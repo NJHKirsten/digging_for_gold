@@ -1,4 +1,5 @@
 #!/bin/bash
+#PBS -N diggingForGoldHannes
 #PBS -q gpu_1
 #PBS -l ncpus=8:ngpus=1
 #PBS -P CSCI1166
