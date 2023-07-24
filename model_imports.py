@@ -1,0 +1,1 @@
+from experiments.mlp_2_hidden_mnist.model import Mlp2Hidden
