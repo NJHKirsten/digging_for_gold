@@ -122,7 +122,8 @@ class ExperimentRunner:
             train_kwargs.update(cuda_kwargs)
             test_kwargs.update(cuda_kwargs)
         else:
-            device = torch.device("cpu")
+            raise Exception("No CUDA device available")
+            # device = torch.device("cpu")
 
         training_set, testing_set = dataset_setup.create_datasets()
 
