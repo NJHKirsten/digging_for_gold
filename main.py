@@ -1,5 +1,4 @@
 from experiment_runner import ExperimentRunner
-from model_visualiser import ModelVisualiser
 from run_analyses import RunAnalyses
 
 
