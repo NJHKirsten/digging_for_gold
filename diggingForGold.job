@@ -8,6 +8,8 @@
 #PBS -e /mnt/lustre/users/hkirsten/DiggingForGold/digging_for_gold/run/0/output.err
 #PBS -M u19049014@tuks.co.za
 
+echo $PBS_JOBID
+
 cd /mnt/lustre/users/hkirsten/DiggingForGold/digging_for_gold || exit
 
 module add chpc/python/anaconda/3-2021.11
