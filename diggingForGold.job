@@ -4,16 +4,14 @@
 #PBS -l select=1:ncpus=8:ngpus=1
 #PBS -P CSCI1166
 #PBS -l walltime=4:00:00
-#PBS -o /mnt/lustre/users/hkirsten/DiggingForGold/digging_for_gold/run/0/output.out
-#PBS -e /mnt/lustre/users/hkirsten/DiggingForGold/digging_for_gold/run/0/output.err
 #PBS -M u19049014@tuks.co.za
-
-echo $PBS_JOBID
 
 cd /mnt/lustre/users/hkirsten/DiggingForGold/digging_for_gold || exit
 
-module add chpc/python/anaconda/3-2021.11
-module add chpc/cuda/11.6/PCIe/11.6
+echo $PBS_JOBID
+
+module load chpc/python/anaconda/3-2021.11
+module load chpc/cuda/11.6/PCIe/11.6
 
 source /mnt/lustre/users/hkirsten/DiggingForGold/digging_for_gold/job_env/bin/activate
 
