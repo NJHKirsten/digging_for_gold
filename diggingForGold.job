@@ -15,4 +15,4 @@ module load chpc/cuda/11.6/PCIe/11.6
 
 source /mnt/lustre/users/hkirsten/DiggingForGold/digging_for_gold/job_env/bin/activate
 
-python3 test_run.py
+python3 main.py
