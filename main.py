@@ -4,7 +4,7 @@ from run_analyses import RunAnalyses
 
 
 def main():
-    ExperimentRunner.run()
+    ExperimentRunner.run(True)
     # RunAnalyses.run()
     # ModelVisualiser.visualise()
 

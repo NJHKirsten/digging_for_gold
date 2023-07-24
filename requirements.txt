@@ -1,3 +1,6 @@
 pandas~=2.0.3
+matplotlib~=3.7.2
+--find-links https://download.pytorch.org/whl/torch_stable.html
 torchvision~=0.16.0.dev20230709+cu121
+--find-links https://download.pytorch.org/whl/torch_stable.html
 torch~=2.1.0.dev20230709+cu121

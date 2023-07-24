@@ -1,15 +1,15 @@
 {
 
-    "epochs" : 50,
-    "batch_size" : 16384,
+    "epochs" : 5,
+    "batch_size" : 4096,
     "learning_rate" : 0.001,
     "gamma" : 0.9,
 
-    "dry_run" : false,
+    "dry_run" : true,
     "log_interval" : 10,
     "save_interval" : 1000,
 
-    "test_batch_size" : 16384,
+    "test_batch_size" : 1000,
 
     "use_cuda" : true,
     "cuda_device" : "cuda:0",

@@ -13,17 +13,23 @@ from dataset_imports import *
 class ExperimentRunner:
     experiment_configs = None
 
-    def __init__(self, experiment_configs, global_config):
+    def __init__(self, experiment_configs, global_config, seeds_file="seeds.json"):
         self.experiment_configs = experiment_configs
         self.global_config = global_config
+        self.seeds_file = seeds_file
 
     @staticmethod
-    def run():
-        experiment_configs = pd.read_csv("experiment_config.csv")
-        global_config = json.load(open("all_experiments_config.json"))
-        global_config['run'] = ExperimentRunner.__get_run_number()
-        experiment_runner = ExperimentRunner(experiment_configs, global_config)
-        experiment_runner.run_all()
+    def run(only_pruning=False, experiments_file="experiment_config.csv",
+            global_config_file="all_experiments_config.json", seeds_file="seeds.json"):
+        experiment_configs = pd.read_csv(experiments_file)
+        global_config = json.load(open(global_config_file))
+        if not only_pruning:
+            global_config['run'] = ExperimentRunner.__get_run_number() + 1
+        else:
+            global_config['run'] = ExperimentRunner.__get_run_number()
+
+        experiment_runner = ExperimentRunner(experiment_configs, global_config, seeds_file)
+        experiment_runner.run_all(only_pruning)
 
     @staticmethod
     def __get_run_number():
@@ -32,25 +38,27 @@ class ExperimentRunner:
             return 0
         existing_runs = os.listdir('runs')
         existing_runs.sort(reverse=True)
-        return 0 if len(existing_runs) == 0 else int(existing_runs[0]) + 1
+        return 0 if len(existing_runs) == 0 else int(existing_runs[0])
 
-    def run_all(self):
-        for model_name, model_class, dataset_name, dataset_class, sample_size in zip(
+    def run_all(self, only_pruning=False):
+        for model_name, model_class, dataset_name, dataset_class, sample_size, parameters in zip(
                 self.experiment_configs["model_name"],
                 self.experiment_configs["model_class"],
                 self.experiment_configs["dataset_name"],
                 self.experiment_configs["dataset_class"],
-                self.experiment_configs["sample_size"]):
+                self.experiment_configs["sample_size"],
+                self.experiment_configs["parameters"]):
             print(f"Running experiment for {model_name} on {dataset_name}")
-            self.__run_training_experiment(model_name, model_class, dataset_name, dataset_class, sample_size)
-            self.__run_pruning_experiment(model_name, model_class, dataset_name, dataset_class, sample_size)
+            if not only_pruning:
+                self.__run_training_experiment(model_name, model_class, dataset_name, dataset_class, sample_size, parameters)
+            self.__run_pruning_experiment(model_name, model_class, dataset_name, dataset_class, sample_size, parameters)
 
-    def __run_training_experiment(self, model_name, model_class, dataset_name, dataset_class, sample_size):
+    def __run_training_experiment(self, model_name, model_class, dataset_name, dataset_class, sample_size, parameters):
         dataset_setup = self.__class_from_string(dataset_class)()
 
         path = f"experiments/{model_name}_{dataset_name}/"
-        parameters = json.load(open(f"{path}/parameters.json"))
-        seeds = json.load(open(f"{path}/seeds.json"))
+        parameters = json.load(open(f"{path}/{parameters}"))
+        seeds = json.load(open(f"{path}/{self.seeds_file}"))
 
         for sample in range(sample_size):
             seed = seeds[sample]
@@ -58,12 +66,12 @@ class ExperimentRunner:
             model = self.__class_from_string(model_class)()
             self.__train_sample(model, model_name, parameters, dataset_setup, dataset_name, seed)
 
-    def __run_pruning_experiment(self, model_name, model_class, dataset_name, dataset_class, sample_size):
+    def __run_pruning_experiment(self, model_name, model_class, dataset_name, dataset_class, sample_size, parameters):
         dataset_setup = self.__class_from_string(dataset_class)()
 
         path = f"experiments/{model_name}_{dataset_name}/"
-        parameters = json.load(open(f"{path}/parameters.json"))
-        seeds = json.load(open(f"{path}/seeds.json"))
+        parameters = json.load(open(f"{path}/{parameters}"))
+        seeds = json.load(open(f"{path}/{self.seeds_file}"))
 
         for sample in range(sample_size):
             seed = seeds[sample]
@@ -73,7 +81,8 @@ class ExperimentRunner:
 
     def __prune_sample(self, model, model_name, parameters, dataset_setup, dataset_name, seed):
 
-        model.load_state_dict(torch.load(f"runs/{self.global_config['run']}/trained_models/{model_name}_{dataset_name}/{seed}/original.pt"))
+        model.load_state_dict(torch.load(
+            f"runs/{self.global_config['run']}/trained_models/{model_name}_{dataset_name}/{seed}/original.pt"))
         torch.manual_seed(seed)
         parameters_to_prune = model.get_pruning_parameters()
 
@@ -84,7 +93,7 @@ class ExperimentRunner:
                 pruning_method=prune.L1Unstructured,
                 amount=portion,
             )
-            for module in parameters_to_prune:
+            for module, name in parameters_to_prune:
                 prune.remove(module, 'weight')
 
             print(f"Pruned {portion * 100}% of weights")
@@ -96,7 +105,8 @@ class ExperimentRunner:
                                 seed,
                                 f'{round(portion * 100)}%')
             model.load_state_dict(
-                torch.load(f"runs/{self.global_config['run']}/trained_models/{model_name}_{dataset_name}/{seed}/{round(portion * 100)}%.pt"))
+                torch.load(
+                    f"runs/{self.global_config['run']}/trained_models/{model_name}_{dataset_name}/{seed}/{round(portion * 100)}%.pt"))
             torch.manual_seed(seed)
 
     def __train_sample(self, model, model_name, parameters, dataset_setup, dataset_name, seed, portion="original"):
@@ -134,13 +144,19 @@ class ExperimentRunner:
             self.__test_model(model, device, test_loader, loss_function)
             training_graph.append(self.__get_epoch_data(epoch, model, device, train_loader, test_loader, loss_function))
             scheduler.step()
+            if epoch % parameters["log_interval"] == 0:
+                print(f"Finished epoch {epoch}")
 
-        os.makedirs(f"runs/{self.global_config['run']}/trained_models/{model_name}_{dataset_name}/{seed}", exist_ok=True)
+        os.makedirs(f"runs/{self.global_config['run']}/trained_models/{model_name}_{dataset_name}/{seed}",
+                    exist_ok=True)
         torch.save(model.state_dict(),
                    f"runs/{self.global_config['run']}/trained_models/{model_name}_{dataset_name}/{seed}/{portion}.pt")
         training_graph_df = pd.DataFrame(training_graph)
-        os.makedirs(f"runs/{self.global_config['run']}/training_graphs/{model_name}_{dataset_name}/{seed}", exist_ok=True)
-        training_graph_df.to_csv(f"runs/{self.global_config['run']}/training_graphs/{model_name}_{dataset_name}/{seed}/{portion}.csv", index=False)
+        os.makedirs(f"runs/{self.global_config['run']}/training_graphs/{model_name}_{dataset_name}/{seed}",
+                    exist_ok=True)
+        training_graph_df.to_csv(
+            f"runs/{self.global_config['run']}/training_graphs/{model_name}_{dataset_name}/{seed}/{portion}.csv",
+            index=False)
 
     @staticmethod
     def __class_from_string(class_name):
