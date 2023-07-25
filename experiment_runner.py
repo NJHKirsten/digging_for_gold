@@ -12,29 +12,23 @@ from analysis.weight_analysis import WeightAnalysis
 from model_imports import *
 from dataset_imports import *
 
-from multiprocessing import Process
+from multiprocessing import Process, Pool
 
 
 class ExperimentRunner:
-    experiment_configs = None
+    run_config = None
 
-    def __init__(self, experiment_configs, global_config, seeds_file="seeds.json"):
-        self.experiment_configs = experiment_configs
-        self.global_config = global_config
+    def __init__(self, run_config, seeds_file="seeds.json"):
+        self.run_config = run_config
         self.seeds_file = seeds_file
 
     @staticmethod
-    def run(only_pruning=False, experiments_file="experiment_config.csv",
-            global_config_file="all_experiments_config.json", seeds_file="seeds.json"):
-        experiment_configs = pd.read_csv(f'setups/{experiments_file}')
-        global_config = json.load(open(f'config/{global_config_file}'))
-        if not only_pruning:
-            global_config['run'] = ExperimentRunner.__get_run_number() + 1
-        else:
-            global_config['run'] = ExperimentRunner.__get_run_number()
+    def run(run_name, seeds_file="seeds.json"):
+        run_config = json.load(open(f'run_configs/{run_name}.json', 'r'))
+        run_config['run'] = run_name
 
-        experiment_runner = ExperimentRunner(experiment_configs, global_config, seeds_file)
-        experiment_runner.run_all(only_pruning)
+        experiment_runner = ExperimentRunner(run_config, seeds_file)
+        experiment_runner.run_all()
 
     @staticmethod
     def __get_run_number():
@@ -45,77 +39,93 @@ class ExperimentRunner:
         existing_runs.sort(reverse=True)
         return 0 if len(existing_runs) == 0 else int(existing_runs[0])
 
-    def run_all(self, only_pruning=False):
-        for model_name, model_class, dataset_name, dataset_class, sample_size, parameters in zip(
-                self.experiment_configs["model_name"],
-                self.experiment_configs["model_class"],
-                self.experiment_configs["dataset_name"],
-                self.experiment_configs["dataset_class"],
-                self.experiment_configs["sample_size"],
-                self.experiment_configs["parameters"]):
-            print(f"Running experiment for {model_name} on {dataset_name}")
-            if not only_pruning:
-                self.__run_training_experiment(model_name, model_class, dataset_name, dataset_class, sample_size,
-                                               parameters)
-            self.__run_pruning_experiment(model_name, model_class, dataset_name, dataset_class, sample_size, parameters)
+    def run_all(self):
+        model_name, model_class, dataset_name, dataset_class, sample_size = \
+            (self.run_config["model_name"],
+             self.run_config["model_class"],
+             self.run_config["dataset_name"],
+             self.run_config["dataset_class"],
+             self.run_config["sample_size"])
+        print(f"Running experiment for {model_name} on {dataset_name}")
 
-    def __run_training_experiment(self, model_name, model_class, dataset_name, dataset_class, sample_size, parameters):
+        self.__run_training_experiment(model_name, model_class, dataset_name, dataset_class, sample_size)
+        self.__run_pruning_experiment(model_name, model_class, dataset_name, dataset_class, sample_size)
+
+    def __run_training_experiment(self, model_name, model_class, dataset_name, dataset_class, sample_size):
         dataset_setup = self.__class_from_string(dataset_class)()
 
         path = f"experiments/{model_name}_{dataset_name}/"
-        parameters = json.load(open(f"{path}/{parameters}"))
         seeds = json.load(open(f"{path}/{self.seeds_file}"))
 
         process_list = []
+        # if self.run_config["multiprocessing"]:
+        #     pool = Pool(2)
         for sample in range(sample_size):
             seed = seeds[sample]
             print(f"Running sample {sample} with seed {seed}")
             model = self.__class_from_string(model_class)()
-            if self.global_config["multiprocessing"]:
+            if self.run_config["multiprocessing"]:
+                # pool.apply_async(self.train_sample,
+                #                  args=(model, model_name, dataset_setup, dataset_name, seed))
                 process = Process(target=self.train_sample,
-                                  args=(model, model_name, parameters, dataset_setup, dataset_name, seed))
+                                  args=(model, model_name, dataset_setup, dataset_name, seed))
                 process.start()
                 process_list.append(process)
+                if self.run_config["num_processes"] <= len(process_list):
+                    for process in process_list:
+                        process.join()
+                    process_list = []
             else:
-                self.train_sample(model, model_name, parameters, dataset_setup, dataset_name, seed)
+                self.train_sample(model, model_name, dataset_setup, dataset_name, seed)
 
-        if self.global_config["multiprocessing"]:
+        if self.run_config["multiprocessing"]:
+            # pool.close()
+            # pool.join()
             for process in process_list:
                 process.join()
 
-    def __run_pruning_experiment(self, model_name, model_class, dataset_name, dataset_class, sample_size, parameters):
+    def __run_pruning_experiment(self, model_name, model_class, dataset_name, dataset_class, sample_size):
         dataset_setup = self.__class_from_string(dataset_class)()
 
         path = f"experiments/{model_name}_{dataset_name}/"
-        parameters = json.load(open(f"{path}/{parameters}"))
         seeds = json.load(open(f"{path}/{self.seeds_file}"))
 
         process_list = []
+        # if self.run_config["multiprocessing"]:
+        #     pool = Pool(processes=2)
         for sample in range(sample_size):
             seed = seeds[sample]
             print(f"Pruning sample {sample} with seed {seed}")
             model = self.__class_from_string(model_class)()
 
-            if self.global_config["multiprocessing"]:
+            if self.run_config["multiprocessing"]:
+                # pool.apply_async(self.prune_sample,
+                #                  args=(model, model_name, dataset_setup, dataset_name, seed))
                 process = Process(target=self.prune_sample,
-                                  args=(model, model_name, parameters, dataset_setup, dataset_name, seed))
+                                  args=(model, model_name, dataset_setup, dataset_name, seed))
                 process.start()
                 process_list.append(process)
+                if self.run_config["num_processes"] <= len(process_list):
+                    for process in process_list:
+                        process.join()
+                    process_list = []
             else:
-                self.prune_sample(model, model_name, parameters, dataset_setup, dataset_name, seed)
+                self.prune_sample(model, model_name, dataset_setup, dataset_name, seed)
 
-        if self.global_config["multiprocessing"]:
+        if self.run_config["multiprocessing"]:
+            # pool.close()
+            # pool.join()
             for process in process_list:
                 process.join()
 
-    def prune_sample(self, model, model_name, parameters, dataset_setup, dataset_name, seed):
+    def prune_sample(self, model, model_name, dataset_setup, dataset_name, seed):
 
         model.load_state_dict(torch.load(
-            f"runs/{self.global_config['run']}/trained_models/{model_name}_{dataset_name}/{seed}/original.pt"))
+            f"runs/{self.run_config['run']}/trained_models/{model_name}_{dataset_name}/{seed}/original.pt"))
         torch.manual_seed(seed)
         parameters_to_prune = model.get_pruning_parameters()
 
-        for portion in self.global_config["prune_sizes"]:
+        for portion in self.run_config["prune_sizes"]:
 
             # TODO DELETE
             zero_weights, total_weights = WeightAnalysis.get_zero_weights(model)
@@ -144,7 +154,6 @@ class ExperimentRunner:
 
             self.train_sample(model,
                               model_name,
-                              parameters,
                               dataset_setup,
                               dataset_name,
                               seed,
@@ -157,7 +166,7 @@ class ExperimentRunner:
 
             model.load_state_dict(
                 torch.load(
-                    f"runs/{self.global_config['run']}/trained_models/{model_name}_{dataset_name}/{seed}/{round(portion * 100)}%.pt"))
+                    f"runs/{self.run_config['run']}/trained_models/{model_name}_{dataset_name}/{seed}/{round(portion * 100)}%.pt"))
             torch.manual_seed(seed)
 
     @staticmethod
@@ -174,16 +183,16 @@ class ExperimentRunner:
         else:
             layer.reset_parameters()
 
-    def train_sample(self, model, model_name, parameters, dataset_setup, dataset_name, seed, portion="original"):
+    def train_sample(self, model, model_name, dataset_setup, dataset_name, seed, portion="original"):
 
         torch.manual_seed(seed)
 
-        train_kwargs = {'batch_size': parameters["batch_size"]}
-        test_kwargs = {'batch_size': parameters["test_batch_size"]}
+        train_kwargs = {'batch_size': self.run_config["batch_size"]}
+        test_kwargs = {'batch_size': self.run_config["test_batch_size"]}
 
-        if parameters["use_cuda"] and torch.cuda.is_available():
-            device = torch.device(parameters["cuda_device"])
-            cuda_kwargs = parameters["cuda_config"]
+        if self.run_config["use_cuda"] and torch.cuda.is_available():
+            device = torch.device(self.run_config["cuda_device"])
+            cuda_kwargs = self.run_config["cuda_config"]
             train_kwargs.update(cuda_kwargs)
             test_kwargs.update(cuda_kwargs)
         else:
@@ -197,37 +206,61 @@ class ExperimentRunner:
 
         model = model.to(device)
 
-        model_training_config = model.get_training_config(parameters["learning_rate"], parameters["gamma"])
+        model_training_config = model.get_training_config(self.run_config["learning_rate"], self.run_config["gamma"])
         optimizer = model_training_config["optimizer"]
         scheduler = model_training_config["scheduler"]
         loss_function = model_training_config["loss_function"]
 
-        training_graph = []
+        csv_graph_path = f"runs/{self.run_config['run']}/training_graphs/{model_name}_{dataset_name}/{seed}/{portion}.csv"
+        model_path = f"runs/{self.run_config['run']}/trained_models/{model_name}_{dataset_name}/{seed}/{portion}.pt"
 
-        for epoch in range(1, parameters["epochs"] + 1):
-            self.__train_model(model, device, train_loader, optimizer, epoch, loss_function, parameters["log_interval"],
-                               parameters["dry_run"])
+        training_graph = []
+        start_epoch = 1
+        # TODO Get epoch data if exists
+        if os.path.isfile(csv_graph_path):
+            training_graph_df = pd.read_csv(csv_graph_path)
+            start_epoch = training_graph_df["epoch"].max() + 1
+            training_graph = training_graph_df.to_dict('records')
+
+        # TODO Load model if exists
+        if os.path.isfile(model_path):
+            model.load_state_dict(torch.load(model_path))
+
+        for epoch in range(start_epoch, self.run_config["epochs"] + 1):  # TODO Continue at last saved epoch
+            self.__train_model(model, device, train_loader, optimizer, epoch, loss_function,
+                               self.run_config["log_interval"],
+                               self.run_config["dry_run"])
             self.__test_model(model, device, test_loader, loss_function)
             training_graph.append(self.__get_epoch_data(epoch, model, device, train_loader, test_loader, loss_function))
             scheduler.step()
-            if epoch % parameters["log_interval"] == 0:
+
+            if epoch % self.run_config["log_interval"] == 0:
                 print(f"Finished epoch {epoch}")
 
-        os.makedirs(f"runs/{self.global_config['run']}/trained_models/{model_name}_{dataset_name}/{seed}",
-                    exist_ok=True)
+            # TODO Save epoch data and model at saving interval
+            if epoch % self.run_config["save_interval"] == 0:
+                os.makedirs(f"runs/{self.run_config['run']}/trained_models/{model_name}_{dataset_name}/{seed}",
+                            exist_ok=True)
+                torch.save(model.state_dict(),
+                           model_path)
+                training_graph_df = pd.DataFrame(training_graph)
+                os.makedirs(f"runs/{self.run_config['run']}/training_graphs/{model_name}_{dataset_name}/{seed}",
+                            exist_ok=True)
+                training_graph_df.to_csv(csv_graph_path, index=False)
 
         # TODO DELETE
         zero_weights, total_weights = WeightAnalysis.get_zero_weights(model)
         print(f"After training - {zero_weights}/{total_weights} - {zero_weights / total_weights}")
         ############################
-        torch.save(model.state_dict(),
-                   f"runs/{self.global_config['run']}/trained_models/{model_name}_{dataset_name}/{seed}/{portion}.pt")
-        training_graph_df = pd.DataFrame(training_graph)
-        os.makedirs(f"runs/{self.global_config['run']}/training_graphs/{model_name}_{dataset_name}/{seed}",
+
+        os.makedirs(f"runs/{self.run_config['run']}/training_graphs/{model_name}_{dataset_name}/{seed}",
                     exist_ok=True)
-        training_graph_df.to_csv(
-            f"runs/{self.global_config['run']}/training_graphs/{model_name}_{dataset_name}/{seed}/{portion}.csv",
-            index=False)
+        torch.save(model.state_dict(),
+                   model_path)
+        training_graph_df = pd.DataFrame(training_graph)
+        os.makedirs(f"runs/{self.run_config['run']}/trained_models/{model_name}_{dataset_name}/{seed}",
+                    exist_ok=True)
+        training_graph_df.to_csv(csv_graph_path, index=False)
 
     @staticmethod
     def __class_from_string(class_name):
@@ -236,7 +269,7 @@ class ExperimentRunner:
     @staticmethod
     def __train_model(model, device, train_loader, optimizer, epoch, loss_function, log_interval, dry_run):
         model.train()
-        total_loss = 0
+        # total_loss = 0
         for batch_idx, (data, target) in enumerate(train_loader):
             data, target = data.to(device), target.to(device)
             optimizer.zero_grad()
@@ -248,7 +281,7 @@ class ExperimentRunner:
                 # print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                 #     epoch, batch_idx * len(data), len(train_loader.dataset),
                 #     100. * batch_idx / len(train_loader), loss.item()))
-                total_loss += loss.item()
+                # total_loss += loss.item()
                 if dry_run:
                     break
 

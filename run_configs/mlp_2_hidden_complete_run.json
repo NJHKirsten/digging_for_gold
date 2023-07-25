@@ -1,0 +1,32 @@
+{
+  "dry_run" : false,
+
+  "learning_rate" : 0.001,
+  "gamma" : 0.9,
+
+  "epochs" : 100,
+
+  "batch_size" : 100000,
+  "test_batch_size" : 100000,
+
+  "prune_sizes" : [ 0.7, 0.5, 0.3, 0.2, 0.1, 0.05],
+
+  "log_interval" : 10,
+  "save_interval" : 10,
+
+  "multiprocessing" : true,
+  "num_processes" : 10,
+  "use_cuda" : true,
+  "cuda_device" : "cuda:0",
+  "cuda_config" : {
+      "num_workers": 4,
+      "pin_memory": true,
+      "shuffle": true
+  },
+
+  "model_name": "mlp_2_hidden",
+  "model_class": "Mlp2Hidden",
+  "dataset_name": "mnist",
+  "dataset_class": "MnistSetup",
+  "sample_size": 100
+}

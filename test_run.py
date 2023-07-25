@@ -2,7 +2,7 @@ from experiment_runner import ExperimentRunner
 
 
 def main():
-    ExperimentRunner.run(only_pruning=False, experiments_file="testing_config.csv")
+    ExperimentRunner.run(run_name="mlp_2_hidden_test_run")
 
 
 if __name__ == "__main__":
