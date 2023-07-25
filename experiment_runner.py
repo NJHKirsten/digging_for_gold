@@ -1,3 +1,4 @@
+import math
 import os
 import sys
 
@@ -5,7 +6,9 @@ import pandas as pd
 import json
 import torch
 import torch.nn.utils.prune as prune
+from torch.nn import init
 
+from analysis.weight_analysis import WeightAnalysis
 from model_imports import *
 from dataset_imports import *
 
@@ -23,8 +26,8 @@ class ExperimentRunner:
     @staticmethod
     def run(only_pruning=False, experiments_file="experiment_config.csv",
             global_config_file="all_experiments_config.json", seeds_file="seeds.json"):
-        experiment_configs = pd.read_csv(experiments_file)
-        global_config = json.load(open(global_config_file))
+        experiment_configs = pd.read_csv(f'setups/{experiments_file}')
+        global_config = json.load(open(f'config/{global_config_file}'))
         if not only_pruning:
             global_config['run'] = ExperimentRunner.__get_run_number() + 1
         else:
@@ -68,14 +71,17 @@ class ExperimentRunner:
             seed = seeds[sample]
             print(f"Running sample {sample} with seed {seed}")
             model = self.__class_from_string(model_class)()
-            # self.__train_sample(model, model_name, parameters, dataset_setup, dataset_name, seed)
-            process = Process(target=self.__train_sample,
-                              args=(model, model_name, parameters, dataset_setup, dataset_name, seed))
-            process.start()
-            process_list.append(process)
+            if self.global_config["multiprocessing"]:
+                process = Process(target=self.train_sample,
+                                  args=(model, model_name, parameters, dataset_setup, dataset_name, seed))
+                process.start()
+                process_list.append(process)
+            else:
+                self.train_sample(model, model_name, parameters, dataset_setup, dataset_name, seed)
 
-        for process in process_list:
-            process.join()
+        if self.global_config["multiprocessing"]:
+            for process in process_list:
+                process.join()
 
     def __run_pruning_experiment(self, model_name, model_class, dataset_name, dataset_class, sample_size, parameters):
         dataset_setup = self.__class_from_string(dataset_class)()
@@ -89,16 +95,20 @@ class ExperimentRunner:
             seed = seeds[sample]
             print(f"Pruning sample {sample} with seed {seed}")
             model = self.__class_from_string(model_class)()
-            # self.__prune_sample(model, model_name, parameters, dataset_setup, dataset_name, seed)
-            process = Process(target=self.__train_sample,
-                              args=(model, model_name, parameters, dataset_setup, dataset_name, seed))
-            process.start()
-            process_list.append(process)
 
-        for process in process_list:
-            process.join()
+            if self.global_config["multiprocessing"]:
+                process = Process(target=self.prune_sample,
+                                  args=(model, model_name, parameters, dataset_setup, dataset_name, seed))
+                process.start()
+                process_list.append(process)
+            else:
+                self.prune_sample(model, model_name, parameters, dataset_setup, dataset_name, seed)
 
-    def __prune_sample(self, model, model_name, parameters, dataset_setup, dataset_name, seed):
+        if self.global_config["multiprocessing"]:
+            for process in process_list:
+                process.join()
+
+    def prune_sample(self, model, model_name, parameters, dataset_setup, dataset_name, seed):
 
         model.load_state_dict(torch.load(
             f"runs/{self.global_config['run']}/trained_models/{model_name}_{dataset_name}/{seed}/original.pt"))
@@ -107,28 +117,64 @@ class ExperimentRunner:
 
         for portion in self.global_config["prune_sizes"]:
 
+            # TODO DELETE
+            zero_weights, total_weights = WeightAnalysis.get_zero_weights(model)
+            print(f"Before Pruning - {zero_weights}/{total_weights} - {zero_weights / total_weights}")
+            ############################
+
             prune.global_unstructured(
                 parameters_to_prune,
                 pruning_method=prune.L1Unstructured,
-                amount=portion,
+                amount=1 - portion,
             )
-            for module, name in parameters_to_prune:
-                prune.remove(module, 'weight')
+            # for name, param in model.named_parameters():
+            #     if param.requires_grad:
+            #         param.data.random_()
+            for layer in model.children():
+                self.__reinitialise_pruned_layer(layer)
+            # for module, name in parameters_to_prune:
+            #     prune.remove(module, name)
 
             print(f"Pruned {portion * 100}% of weights")
-            self.__train_sample(model,
-                                model_name,
-                                parameters,
-                                dataset_setup,
-                                dataset_name,
-                                seed,
-                                f'{round(portion * 100)}%')
+
+            # TODO DELETE
+            zero_weights, total_weights = WeightAnalysis.get_zero_weights(model)
+            print(f"After pruning - {zero_weights}/{total_weights} - {zero_weights / total_weights}")
+            ############################
+
+            self.train_sample(model,
+                              model_name,
+                              parameters,
+                              dataset_setup,
+                              dataset_name,
+                              seed,
+                              f'{round(portion * 100)}%')
+
+            # TODO DELETE
+            zero_weights, total_weights = WeightAnalysis.get_zero_weights(model)
+            print(f"Saving model - {zero_weights}/{total_weights} - {zero_weights / total_weights}")
+            ############################
+
             model.load_state_dict(
                 torch.load(
                     f"runs/{self.global_config['run']}/trained_models/{model_name}_{dataset_name}/{seed}/{round(portion * 100)}%.pt"))
             torch.manual_seed(seed)
 
-    def __train_sample(self, model, model_name, parameters, dataset_setup, dataset_name, seed, portion="original"):
+    @staticmethod
+    def __reinitialise_pruned_layer(layer):
+        if prune.is_pruned(layer):
+            init.kaiming_uniform_(layer.weight_orig, a=math.sqrt(5))
+            prune.custom_from_mask(layer, 'weight', layer.weight_mask)
+            if layer.bias_orig is not None:
+                fan_in, _ = init._calculate_fan_in_and_fan_out(layer.weight_orig)
+                if fan_in != 0:
+                    bound = 1 / math.sqrt(fan_in)
+                    init.uniform_(layer.bias_orig, -bound, bound)
+                prune.custom_from_mask(layer, 'bias', layer.bias_mask)
+        else:
+            layer.reset_parameters()
+
+    def train_sample(self, model, model_name, parameters, dataset_setup, dataset_name, seed, portion="original"):
 
         torch.manual_seed(seed)
 
@@ -169,6 +215,11 @@ class ExperimentRunner:
 
         os.makedirs(f"runs/{self.global_config['run']}/trained_models/{model_name}_{dataset_name}/{seed}",
                     exist_ok=True)
+
+        # TODO DELETE
+        zero_weights, total_weights = WeightAnalysis.get_zero_weights(model)
+        print(f"After training - {zero_weights}/{total_weights} - {zero_weights / total_weights}")
+        ############################
         torch.save(model.state_dict(),
                    f"runs/{self.global_config['run']}/trained_models/{model_name}_{dataset_name}/{seed}/{portion}.pt")
         training_graph_df = pd.DataFrame(training_graph)

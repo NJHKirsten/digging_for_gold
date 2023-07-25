@@ -1,6 +1,6 @@
 {
 
-    "epochs" : 5,
+    "epochs" : 2,
     "batch_size" : 4096,
     "learning_rate" : 0.001,
     "gamma" : 0.9,

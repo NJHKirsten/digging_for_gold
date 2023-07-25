@@ -34,4 +34,6 @@ class Mlp2Hidden(nn.Module):
         return (
             (self.fc1, 'weight'),
             (self.fc2, 'weight'),
+            (self.fc1, 'bias'),
+            (self.fc2, 'bias'),
         )

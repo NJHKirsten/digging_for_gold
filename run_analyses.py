@@ -16,9 +16,10 @@ class RunAnalyses:
         self.global_config['run'] = RunAnalyses.__get_run_number()
 
     @staticmethod
-    def run():
-        analysis_configs = pd.read_csv("experiment_config.csv")
-        global_config = json.load(open("all_experiments_config.json"))
+    def run(experiments_file="experiment_config.csv",
+            global_config_file="all_experiments_config.json"):
+        analysis_configs = pd.read_csv(f'setups/{experiments_file}')
+        global_config = json.load(open(f'config/{global_config_file}'))
         analysis = RunAnalyses(analysis_configs, global_config)
         analysis.run_all()
 

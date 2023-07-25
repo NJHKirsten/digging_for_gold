@@ -24,7 +24,7 @@ class WeightAnalysis(Analysis):
                     torch.load(
                         f"runs/{self.global_config['run']}/trained_models/{self.model_name}_{self.dataset_name}/{seeds[sample]}/{portion_name}.pt"),
                     strict=False)
-                zero_weights, total_weights = self.__get_zero_weights(model)
+                zero_weights, total_weights = self.get_zero_weights(model)
                 print(f"[{sample}] - {zero_weights}/{total_weights} - {zero_weights / total_weights}")
 
     @staticmethod
@@ -32,11 +32,17 @@ class WeightAnalysis(Analysis):
         return getattr(sys.modules[__name__], class_name)
 
     @staticmethod
-    def __get_zero_weights(model):
+    def get_zero_weights(model):
         zero_weights = 0
         total_weights = 0
-        for name, param in model.named_parameters():
-            if param.requires_grad:
-                zero_weights += torch.sum(param.abs() < 0.0001)
-                total_weights += param.numel()
+        for layer in model.children():
+            zero_weights += torch.sum(layer.weight.abs() < 0.000001)
+            zero_weights += torch.sum(layer.bias.abs() < 0.000001)
+            total_weights += layer.weight.numel()
+            total_weights += layer.bias.numel()
+
+        # for name, param in model.named_parameters():
+        #     if param.requires_grad:
+        #         zero_weights += torch.sum(param.abs() < 0.000001)
+        #         total_weights += param.numel()
         return zero_weights, total_weights
