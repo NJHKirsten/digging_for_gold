@@ -9,6 +9,8 @@ import torch.nn.utils.prune as prune
 from model_imports import *
 from dataset_imports import *
 
+from multiprocessing import Process
+
 
 class ExperimentRunner:
     experiment_configs = None
@@ -50,7 +52,8 @@ class ExperimentRunner:
                 self.experiment_configs["parameters"]):
             print(f"Running experiment for {model_name} on {dataset_name}")
             if not only_pruning:
-                self.__run_training_experiment(model_name, model_class, dataset_name, dataset_class, sample_size, parameters)
+                self.__run_training_experiment(model_name, model_class, dataset_name, dataset_class, sample_size,
+                                               parameters)
             self.__run_pruning_experiment(model_name, model_class, dataset_name, dataset_class, sample_size, parameters)
 
     def __run_training_experiment(self, model_name, model_class, dataset_name, dataset_class, sample_size, parameters):
@@ -60,11 +63,19 @@ class ExperimentRunner:
         parameters = json.load(open(f"{path}/{parameters}"))
         seeds = json.load(open(f"{path}/{self.seeds_file}"))
 
+        process_list = []
         for sample in range(sample_size):
             seed = seeds[sample]
             print(f"Running sample {sample} with seed {seed}")
             model = self.__class_from_string(model_class)()
-            self.__train_sample(model, model_name, parameters, dataset_setup, dataset_name, seed)
+            # self.__train_sample(model, model_name, parameters, dataset_setup, dataset_name, seed)
+            process = Process(target=self.__train_sample,
+                              args=(model, model_name, parameters, dataset_setup, dataset_name, seed))
+            process.start()
+            process_list.append(process)
+
+        for process in process_list:
+            process.join()
 
     def __run_pruning_experiment(self, model_name, model_class, dataset_name, dataset_class, sample_size, parameters):
         dataset_setup = self.__class_from_string(dataset_class)()
@@ -73,11 +84,19 @@ class ExperimentRunner:
         parameters = json.load(open(f"{path}/{parameters}"))
         seeds = json.load(open(f"{path}/{self.seeds_file}"))
 
+        process_list = []
         for sample in range(sample_size):
             seed = seeds[sample]
             print(f"Pruning sample {sample} with seed {seed}")
             model = self.__class_from_string(model_class)()
-            self.__prune_sample(model, model_name, parameters, dataset_setup, dataset_name, seed)
+            # self.__prune_sample(model, model_name, parameters, dataset_setup, dataset_name, seed)
+            process = Process(target=self.__train_sample,
+                              args=(model, model_name, parameters, dataset_setup, dataset_name, seed))
+            process.start()
+            process_list.append(process)
+
+        for process in process_list:
+            process.join()
 
     def __prune_sample(self, model, model_name, parameters, dataset_setup, dataset_name, seed):
 

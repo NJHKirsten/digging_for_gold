@@ -18,7 +18,7 @@ class WeightAnalysis(Analysis):
         for portion in ['original']+self.global_config["prune_sizes"]:
             portion_name = portion if portion == 'original' else f'{round(portion * 100)}%'
 
-            print(f'portion_name zero weights')
+            print(f'{portion_name} zero weights')
             for sample in range(self.sample_size):
                 model.load_state_dict(
                     torch.load(
