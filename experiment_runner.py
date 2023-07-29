@@ -123,8 +123,14 @@ class ExperimentRunner:
         model.load_state_dict(torch.load(
             f"runs/{self.run_config['run']}/trained_models/{model_name}_{dataset_name}/{seed}/original.pt"))
         torch.manual_seed(seed)
+        if self.run_config["use_cuda"] and torch.cuda.is_available():
+            device = torch.device(self.run_config["cuda_device"])
+        else:
+            raise Exception("No CUDA device available")
+            # device = torch.device("cpu")
 
         for portion in self.run_config["prune_sizes"]:
+            model.to(device)
             parameters_to_prune = model.get_pruning_parameters()
 
             # TODO DELETE
