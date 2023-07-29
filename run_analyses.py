@@ -10,17 +10,15 @@ from analysis.weight_analysis import WeightAnalysis
 
 class RunAnalyses:
 
-    def __init__(self, analysis_configs, global_config):
-        self.analysis_configs = analysis_configs
-        self.global_config = global_config
-        self.global_config['run'] = RunAnalyses.__get_run_number()
+    def __init__(self, run_config, seeds_file="seeds.json"):
+        self.run_config = run_config
+        self.seeds_file = seeds_file
 
     @staticmethod
-    def run(experiments_file="experiment_config.csv",
-            global_config_file="all_experiments_config.json"):
-        analysis_configs = pd.read_csv(f'setups/{experiments_file}')
-        global_config = json.load(open(f'config/{global_config_file}'))
-        analysis = RunAnalyses(analysis_configs, global_config)
+    def run(run_name, seeds_file="seeds.json"):
+        run_config = json.load(open(f'run_configs/{run_name}.json', 'r'))
+        run_config['run'] = run_name
+        analysis = RunAnalyses(run_config, seeds_file)
         analysis.run_all()
 
     @staticmethod
@@ -34,30 +32,30 @@ class RunAnalyses:
         return int(existing_runs[0])
 
     def run_all(self):
-        for model_name, model_class, dataset_name, dataset_class, sample_size in zip(
-                self.analysis_configs["model_name"],
-                self.analysis_configs["model_class"],
-                self.analysis_configs["dataset_name"],
-                self.analysis_configs["dataset_class"],
-                self.analysis_configs["sample_size"]):
-            training_analysis = TrainingAnalysis(model_name,
-                                                 model_class,
-                                                 dataset_name,
-                                                 dataset_class,
-                                                 sample_size,
-                                                 self.global_config)
-            training_analysis.run()
-            weight_analysis = WeightAnalysis(model_name,
+        model_name, model_class, dataset_name, dataset_class, sample_size = \
+            (self.run_config["model_name"],
+             self.run_config["model_class"],
+             self.run_config["dataset_name"],
+             self.run_config["dataset_class"],
+             self.run_config["sample_size"])
+        training_analysis = TrainingAnalysis(model_name,
                                              model_class,
                                              dataset_name,
                                              dataset_class,
                                              sample_size,
-                                             self.global_config)
-            weight_analysis.run()
-            sharpness_analysis = SharpnessAnalysis(model_name,
-                                                   model_class,
-                                                   dataset_name,
-                                                   dataset_class,
-                                                   sample_size,
-                                                   self.global_config)
-            sharpness_analysis.run()
+                                             self.run_config)
+        training_analysis.run()
+        weight_analysis = WeightAnalysis(model_name,
+                                         model_class,
+                                         dataset_name,
+                                         dataset_class,
+                                         sample_size,
+                                         self.run_config)
+        weight_analysis.run()
+        sharpness_analysis = SharpnessAnalysis(model_name,
+                                               model_class,
+                                               dataset_name,
+                                               dataset_class,
+                                               sample_size,
+                                               self.run_config)
+        sharpness_analysis.run()

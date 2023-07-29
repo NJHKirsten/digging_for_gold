@@ -123,9 +123,9 @@ class ExperimentRunner:
         model.load_state_dict(torch.load(
             f"runs/{self.run_config['run']}/trained_models/{model_name}_{dataset_name}/{seed}/original.pt"))
         torch.manual_seed(seed)
-        parameters_to_prune = model.get_pruning_parameters()
 
         for portion in self.run_config["prune_sizes"]:
+            parameters_to_prune = model.get_pruning_parameters()
 
             # TODO DELETE
             zero_weights, total_weights = WeightAnalysis.get_zero_weights(model)

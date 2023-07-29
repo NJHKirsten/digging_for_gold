@@ -12,7 +12,7 @@ class TrainingAnalysis(Analysis):
         path = f"experiments/{self.model_name}_{self.dataset_name}/"
         seeds = json.load(open(f"{path}/seeds.json"))
 
-        data_file_prefix = f"runs/{self.global_config['run']}/training_graphs/{self.model_name}_{self.dataset_name}/"
+        data_file_prefix = f"runs/{self.run_config['run']}/training_graphs/{self.model_name}_{self.dataset_name}/"
 
         metrics = ['testing_accuracy', 'testing_loss', 'training_loss', 'training_accuracy']
 
@@ -27,7 +27,7 @@ class TrainingAnalysis(Analysis):
             self.__configure_plot(ax, metric)
             axes[metric] = ax
 
-        for portion in self.global_config["prune_sizes"]:
+        for portion in self.run_config["prune_sizes"]:
             samples = self.__get_samples(data_file_prefix, f'{round(portion * 100)}%', self.sample_size, seeds)
 
             for metric in metrics:
