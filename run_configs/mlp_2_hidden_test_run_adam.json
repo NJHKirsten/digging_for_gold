@@ -3,12 +3,12 @@
 
   "learning_rate" : 0.1,
   "gamma" : 0.9,
-  "optimizer": "adagrad",
+  "optimizer": "adam",
 
   "epochs" : 50,
 
   "batch_size" : 100000,
-  "test_batch_size" : 100000,
+  "test_batch_size" : 10000,
 
   "prune_sizes" : [ 0.7, 0.5],
 
@@ -16,7 +16,7 @@
   "save_interval" : 10,
 
   "multiprocessing" : false,
-  "num_processes" : 2,
+  "num_processes" : 1,
   "use_cuda" : true,
   "cuda_device" : "cuda:0",
   "cuda_config" : {

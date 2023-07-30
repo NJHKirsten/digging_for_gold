@@ -20,8 +20,11 @@ class Mlp2Hidden(nn.Module):
         output = functional.log_softmax(x, dim=1)
         return output
 
-    def get_training_config(self, learning_rate, gamma):
-        optimizer = optim.Adadelta(self.parameters(), lr=learning_rate)
+    def get_training_config(self, learning_rate, gamma, optimizer="adam"):
+        if optimizer == 'adam':
+            optimizer = optim.Adam(self.parameters(), lr=learning_rate)
+        elif optimizer == 'adadelta':
+            optimizer = optim.Adadelta(self.parameters(), lr=learning_rate)
         scheduler = StepLR(optimizer, step_size=1, gamma=gamma)
         loss_function = functional.nll_loss
         return dict(

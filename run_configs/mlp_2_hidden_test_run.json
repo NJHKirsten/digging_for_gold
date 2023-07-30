@@ -3,11 +3,12 @@
 
   "learning_rate" : 0.001,
   "gamma" : 0.9,
+  "optimizer": "adagrad",
 
   "epochs" : 50,
 
-  "batch_size" : 4096,
-  "test_batch_size" : 4096,
+  "batch_size" : 100000,
+  "test_batch_size" : 100000,
 
   "prune_sizes" : [ 0.7, 0.5],
 

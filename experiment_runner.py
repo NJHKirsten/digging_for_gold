@@ -212,7 +212,7 @@ class ExperimentRunner:
 
         model = model.to(device)
 
-        model_training_config = model.get_training_config(self.run_config["learning_rate"], self.run_config["gamma"])
+        model_training_config = model.get_training_config(self.run_config["learning_rate"], self.run_config["gamma"], self.run_config["optimizer"])
         optimizer = model_training_config["optimizer"]
         scheduler = model_training_config["scheduler"]
         loss_function = model_training_config["loss_function"]
