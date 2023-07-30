@@ -11,18 +11,18 @@ from model_imports import *
 class WeightAnalysis(Analysis):
 
     def run(self):
-        path = f"experiments/{self.model_name}_{self.dataset_name}/"
-        seeds = json.load(open(f"{path}/seeds.json"))
-        model = self.__class_from_string(self.model_class)()
+        path = f"experiments/{self.run_config['model_name']}_{self.run_config['dataset_name']}/"
+        seeds = json.load(open(f"{path}/{self.seeds_file}"))
+        model = self.__class_from_string(self.run_config['model_class'])()
 
         for portion in ['original']+self.run_config["prune_sizes"]:
             portion_name = portion if portion == 'original' else f'{round(portion * 100)}%'
 
             print(f'{portion_name} zero weights')
-            for sample in range(self.sample_size):
+            for sample in range(self.run_config['sample_size']):
                 model.load_state_dict(
                     torch.load(
-                        f"runs/{self.run_config['run']}/trained_models/{self.model_name}_{self.dataset_name}/{seeds[sample]}/{portion_name}.pt"),
+                        f"runs/{self.analysis_config['run']}/trained_models/{self.run_config['model_name']}_{self.run_config['dataset_name']}/{seeds[sample]}/{portion_name}.pt"),
                     strict=False)
                 zero_weights, total_weights = self.get_zero_weights(model)
                 print(f"[{sample}] - {zero_weights}/{total_weights} - {zero_weights / total_weights}")

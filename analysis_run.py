@@ -1,8 +1,11 @@
-from run_analyses import RunAnalyses
+import warnings
+
+from analysis.run_analyses import RunAnalyses
 
 
 def main():
-    RunAnalyses.run("mlp_2_hidden_complete_run")
+    # warnings.simplefilter('error', UserWarning)
+    RunAnalyses.run("mlp_2_hidden_analysis")
 
 
 if __name__ == "__main__":

@@ -9,14 +9,14 @@ import matplotlib.ticker as mticker
 class TrainingAnalysis(Analysis):
 
     def run(self):
-        path = f"experiments/{self.model_name}_{self.dataset_name}/"
-        seeds = json.load(open(f"{path}/seeds.json"))
+        path = f"experiments/{self.run_config['model_name']}_{self.run_config['dataset_name']}/"
+        seeds = json.load(open(f"{path}/{self.seeds_file}"))
 
-        data_file_prefix = f"runs/{self.run_config['run']}/training_graphs/{self.model_name}_{self.dataset_name}/"
+        data_file_prefix = f"runs/{self.analysis_config['run']}/training_graphs/{self.run_config['model_name']}_{self.run_config['dataset_name']}/"
 
         metrics = ['testing_accuracy', 'testing_loss', 'training_loss', 'training_accuracy']
 
-        samples = self.__get_samples(data_file_prefix, 'original', self.sample_size, seeds)
+        samples = self.__get_samples(data_file_prefix, 'original', self.run_config['sample_size'], seeds)
         axes = {}
         for metric in metrics:
             ax = samples.plot(use_index=True,
@@ -28,7 +28,7 @@ class TrainingAnalysis(Analysis):
             axes[metric] = ax
 
         for portion in self.run_config["prune_sizes"]:
-            samples = self.__get_samples(data_file_prefix, f'{round(portion * 100)}%', self.sample_size, seeds)
+            samples = self.__get_samples(data_file_prefix, f'{round(portion * 100)}%', self.run_config['sample_size'], seeds)
 
             for metric in metrics:
                 samples.plot(ax=axes[metric], use_index=True,

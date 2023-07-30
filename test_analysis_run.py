@@ -1,8 +1,8 @@
-from run_analyses import RunAnalyses
+from analysis.run_analyses import RunAnalyses
 
 
 def main():
-    RunAnalyses.run(experiments_file="setups/testing_config.csv")
+    RunAnalyses.run(analysis_config_name="setups/testing_config.csv")
 
 
 if __name__ == "__main__":

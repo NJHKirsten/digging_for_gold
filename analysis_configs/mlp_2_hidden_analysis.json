@@ -1,7 +1,16 @@
 {
-  "sharpness_sampling": {
+  "run": "mlp_2_hidden_test_run",
+
+  "sharpness_analysis": {
+    "enabled": true,
     "distance": 0.1,
     "steps": 10,
-    "samples": 5
+    "samples": 1
+  },
+  "training_analysis": {
+    "enabled": false
+  },
+  "weight_analysis": {
+    "enabled": false
   }
 }
