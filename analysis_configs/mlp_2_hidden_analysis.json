@@ -1,0 +1,7 @@
+{
+  "sharpness_sampling": {
+    "distance": 0.1,
+    "steps": 10,
+    "samples": 5
+  }
+}
