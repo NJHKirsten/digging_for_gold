@@ -1,2 +1,0 @@
-model_name,model_class,dataset_name,dataset_class,sample_size
-mlp_2_hidden,Mlp2Hidden,mnist,MnistSetup,2

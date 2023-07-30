@@ -1,13 +1,13 @@
 {
   "dry_run" : false,
 
-  "learning_rate" : 0.001,
+  "learning_rate" : 0.1,
   "gamma" : 0.9,
 
   "epochs" : 50,
 
-  "batch_size" : 4096,
-  "test_batch_size" : 4096,
+  "batch_size" : 100000,
+  "test_batch_size" : 100000,
 
   "prune_sizes" : [ 0.7, 0.5],
 
@@ -15,7 +15,7 @@
   "save_interval" : 10,
 
   "multiprocessing" : false,
-  "num_processes" : 1,
+  "num_processes" : 2,
   "use_cuda" : true,
   "cuda_device" : "cuda:0",
   "cuda_config" : {
