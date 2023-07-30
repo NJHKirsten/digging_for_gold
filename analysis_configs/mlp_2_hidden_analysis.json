@@ -1,16 +1,16 @@
 {
-  "run": "mlp_2_hidden_test_run",
+  "run": "mlp_2_hidden_test_run_2",
 
   "sharpness_analysis": {
     "enabled": true,
-    "distance": 0.1,
+    "distance": 0.01,
     "steps": 10,
     "samples": 1
   },
   "training_analysis": {
-    "enabled": false
+    "enabled": true
   },
   "weight_analysis": {
-    "enabled": false
+    "enabled": true
   }
 }

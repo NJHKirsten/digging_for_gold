@@ -148,8 +148,8 @@ class ExperimentRunner:
             #         param.data.random_()
             for layer in model.children():
                 self.__reinitialise_pruned_layer(layer)
-            # for module, name in parameters_to_prune:
-            #     prune.remove(module, name)
+            for module, name in parameters_to_prune:
+                prune.remove(module, name)
 
             print(f"Pruned {portion * 100}% of weights")
 

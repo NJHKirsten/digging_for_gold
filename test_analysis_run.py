@@ -2,7 +2,7 @@ from analysis.run_analyses import RunAnalyses
 
 
 def main():
-    RunAnalyses.run(analysis_config_name="setups/testing_config.csv")
+    RunAnalyses.run("mlp_2_hidden_analysis")
 
 
 if __name__ == "__main__":
