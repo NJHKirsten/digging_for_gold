@@ -10,6 +10,8 @@ cd /mnt/lustre/users/hkirsten/DiggingForGold/digging_for_gold || exit
 
 echo $PBS_JOBID
 
+nvidia-smi
+
 module load chpc/python/anaconda/3-2021.11
 module load chpc/cuda/11.6/PCIe/11.6
 
