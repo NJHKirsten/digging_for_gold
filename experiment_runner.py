@@ -196,6 +196,10 @@ class ExperimentRunner:
         train_kwargs = {'batch_size': self.run_config["batch_size"]}
         test_kwargs = {'batch_size': self.run_config["test_batch_size"]}
 
+        print(f"Cuda count: {torch.cuda.device_count()}")
+        print(f"Cuda available: {torch.cuda.is_available()}")
+        print(f"Cuda device: {torch.cuda.current_device()}")
+        print(f"Cuda use_cuda: {self.run_config['use_cuda']}")
         if self.run_config["use_cuda"] and torch.cuda.is_available():
             device = torch.device(self.run_config["cuda_device"])
             cuda_kwargs = self.run_config["cuda_config"]
@@ -236,7 +240,7 @@ class ExperimentRunner:
             self.__train_model(model, device, train_loader, optimizer, epoch, loss_function,
                                self.run_config["log_interval"],
                                self.run_config["dry_run"])
-            self.__test_model(model, device, test_loader, loss_function)
+            # self.__test_model(model, device, test_loader, loss_function)
             training_graph.append(self.__get_epoch_data(epoch, model, device, train_loader, test_loader, loss_function))
             scheduler.step()
 
