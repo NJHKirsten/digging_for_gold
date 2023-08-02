@@ -15,6 +15,9 @@ nvidia-smi
 module load chpc/python/anaconda/3-2021.11
 module load chpc/cuda/11.6/PCIe/11.6
 
+
+nvidia-smi
+
 source /mnt/lustre/users/hkirsten/DiggingForGold/digging_for_gold/job_env/bin/activate
 
 python3 test_run.py
