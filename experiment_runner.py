@@ -46,6 +46,7 @@ class ExperimentRunner:
              self.run_config["dataset_name"],
              self.run_config["dataset_class"],
              self.run_config["sample_size"])
+        print(f"Run: {self.run_config['run']}")
         print(f"Running experiment for {model_name} on {dataset_name}")
 
         self.__run_training_experiment(model_name, model_class, dataset_name, dataset_class, sample_size)
@@ -214,7 +215,6 @@ class ExperimentRunner:
         train_loader = torch.utils.data.DataLoader(training_set, **train_kwargs)
         test_loader = torch.utils.data.DataLoader(testing_set, **test_kwargs)
 
-        model = model.to(device)
 
         model_training_config = model.get_training_config(self.run_config["learning_rate"], self.run_config["gamma"], self.run_config["optimizer"])
         optimizer = model_training_config["optimizer"]
@@ -228,13 +228,17 @@ class ExperimentRunner:
         start_epoch = 1
         # TODO Get epoch data if exists
         if os.path.isfile(csv_graph_path):
+            print("Continue with existing training graph")
             training_graph_df = pd.read_csv(csv_graph_path)
             start_epoch = training_graph_df["epoch"].max() + 1
             training_graph = training_graph_df.to_dict('records')
 
         # TODO Load model if exists
         if os.path.isfile(model_path):
+            print("Continue with existing model")
             model.load_state_dict(torch.load(model_path))
+
+        model = model.to(device)
 
         for epoch in range(start_epoch, self.run_config["epochs"] + 1):  # TODO Continue at last saved epoch
             self.__train_model(model, device, train_loader, optimizer, epoch, loss_function,
