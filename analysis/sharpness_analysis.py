@@ -37,20 +37,30 @@ class SharpnessAnalysis(Analysis):
 
         torch.manual_seed(seed)
 
+        model_copy = copy.deepcopy(model)
+        train_loader, loss_function, device = self.__inference_setup(model)
+
         masks = []
         for sample in range(samples):
             masks.append({})
-            for name, parameter in model.state_dict().items():
+            for name, parameter in model_copy.state_dict().items():
                 mask = torch.rand_like(parameter) < 0.5  # TODO Is it ok if the split is not exactly 50%
+                # mask.to(device)
                 masks[sample][name] = mask
+
+        model_copy.to(device)
+        for name, parameter in model_copy.state_dict().items():
+            mask = masks[sample][name].to(device)
+            walk = parameter - (mask * distance * steps)
+            parameter.copy_(walk)
 
         for sample in range(samples):
             print(f'[{sample}]')
             for step in range(-1 * steps, steps + 1):
-                model_copy = copy.deepcopy(model)
                 model_copy.load_state_dict(model.state_dict())
                 for name, parameter in model_copy.state_dict().items():
-                    walk = parameter + (masks[sample][name] * distance * step)
+                    mask = masks[sample][name].to(device)
+                    walk = parameter + (mask * distance)
                     parameter.copy_(walk)
 
                 loss = self.__calculate_loss(model_copy)
@@ -80,7 +90,7 @@ class SharpnessAnalysis(Analysis):
 
     def __calculate_loss(self, model):
         train_loader, loss_function, device = self.__inference_setup(model)
-        model.to(device)
+        # model.to(device)
         loss = 0
         with torch.no_grad():
             for data, target in train_loader:

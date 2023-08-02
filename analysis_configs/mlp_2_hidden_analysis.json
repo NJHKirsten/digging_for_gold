@@ -1,8 +1,8 @@
 {
-  "run": "mlp_2_hidden_test_run_2",
+  "run": "mlp_2_hidden_test_run_adam_2",
 
   "sharpness_analysis": {
-    "enabled": true,
+    "enabled": false,
     "distance": 0.01,
     "steps": 10,
     "samples": 1

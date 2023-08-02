@@ -15,7 +15,7 @@
   "log_interval" : 10,
   "save_interval" : 10,
 
-  "multiprocessing" : false,
+  "multiprocessing" : true,
   "num_processes" : 2,
   "use_cuda" : true,
   "cuda_device" : "cuda:0",
