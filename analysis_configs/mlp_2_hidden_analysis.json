@@ -1,5 +1,5 @@
 {
-  "run": "mlp_2_hidden_test_run_2",
+  "run": "mlp_2_hidden_test_run_adam",
 
   "sharpness_analysis": {
     "enabled": true,
@@ -8,9 +8,9 @@
     "samples": 1
   },
   "training_analysis": {
-    "enabled": false
+    "enabled": true
   },
   "weight_analysis": {
-    "enabled": false
+    "enabled": true
   }
 }
