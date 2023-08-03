@@ -6,9 +6,9 @@ import torch.optim as optim
 from torch.optim.lr_scheduler import StepLR
 
 
-class Mlp2Hidden(nn.Module):
+class Mlp4Hidden(nn.Module):
     def __init__(self):
-        super(Mlp2Hidden, self).__init__()
+        super(Mlp4Hidden, self).__init__()
         self.fc1 = nn.Linear(28 * 28, 256)
         self.fc2 = nn.Linear(256, 512)
         self.fc3 = nn.Linear(512, 256)
