@@ -8,7 +8,7 @@
     "samples": 1
   },
   "training_analysis": {
-    "enabled": false
+    "enabled": true
   },
   "weight_analysis": {
     "enabled": false

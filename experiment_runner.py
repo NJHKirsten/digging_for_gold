@@ -288,7 +288,7 @@ class ExperimentRunner:
         for batch_idx, (data, target) in enumerate(train_loader):
             data, target = data.to(device), target.to(device)
             optimizer.zero_grad()
-            output = model(data)
+            output = model(data).to(device)
             loss = loss_function(output, target)
             loss.backward()
             optimizer.step()
@@ -308,7 +308,7 @@ class ExperimentRunner:
         with torch.no_grad():
             for data, target in test_loader:
                 data, target = data.to(device), target.to(device)
-                output = model(data)
+                output = model(data).to(device)
                 test_loss += loss_function(output, target, reduction='sum').item()  # sum up batch loss
                 pred = output.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
                 correct += pred.eq(target.view_as(pred)).sum().item()
@@ -329,14 +329,14 @@ class ExperimentRunner:
         with torch.no_grad():
             for data, target in train_loader:
                 data, target = data.to(device), target.to(device)
-                output = model(data)
+                output = model(data).to(device)
                 training_loss += loss_function(output, target, reduction='sum').item()  # sum up batch loss
                 pred = output.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
                 train_correct += pred.eq(target.view_as(pred)).sum().item()
 
             for data, target in test_loader:
                 data, target = data.to(device), target.to(device)
-                output = model(data)
+                output = model(data).to(device)
                 testing_loss += loss_function(output, target, reduction='sum').item()  # sum up batch loss
                 pred = output.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
                 test_correct += pred.eq(target.view_as(pred)).sum().item()
