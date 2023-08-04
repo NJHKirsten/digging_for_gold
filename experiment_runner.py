@@ -223,6 +223,7 @@ class ExperimentRunner:
 
         csv_graph_path = f"runs/{self.run_config['run']}/training_graphs/{model_name}_{dataset_name}/{seed}/{portion}.csv"
         model_path = f"runs/{self.run_config['run']}/trained_models/{model_name}_{dataset_name}/{seed}/{portion}.pt"
+        checkpoint_path = f"runs/{self.run_config['run']}/trained_models/{model_name}_{dataset_name}/{seed}/{portion}_checkpoint.pt"
 
         training_graph = []
         start_epoch = 1
@@ -234,10 +235,15 @@ class ExperimentRunner:
             training_graph = training_graph_df.to_dict('records')
 
         # Load model if exists
-        if os.path.isfile(model_path):
+        if os.path.isfile(checkpoint_path):
             print("Continue with existing model")
             # TODO Load optimizer and other states as well, and set to training after loading
-            model.load_state_dict(torch.load(model_path))
+            # model.load_state_dict(torch.load(model_path))
+            model, optimizer, scheduler = self.__load_checkpoint(model, optimizer, scheduler, checkpoint_path)
+            for state in optimizer.state.values():
+                for k, v in state.items():
+                    if isinstance(v, torch.Tensor):
+                        state[k] = v.to(device)
 
         model = model.to(device)
 
@@ -256,8 +262,7 @@ class ExperimentRunner:
             if epoch % self.run_config["save_interval"] == 0:
                 os.makedirs(f"runs/{self.run_config['run']}/trained_models/{model_name}_{dataset_name}/{seed}",
                             exist_ok=True)
-                torch.save(model.state_dict(),
-                           model_path)
+                self.__save_checkpoint(model, optimizer, scheduler, checkpoint_path)
                 training_graph_df = pd.DataFrame(training_graph)
                 os.makedirs(f"runs/{self.run_config['run']}/training_graphs/{model_name}_{dataset_name}/{seed}",
                             exist_ok=True)
@@ -321,7 +326,7 @@ class ExperimentRunner:
 
     @staticmethod
     def __get_epoch_data(epoch, model, device, train_loader, test_loader, loss_function):
-        # TODO Use model eval (Check if this should be done)
+        model.eval()
         training_loss = 0
         train_correct = 0
         testing_loss = 0
@@ -348,3 +353,16 @@ class ExperimentRunner:
                 "testing_loss": testing_loss,
                 "training_accuracy": training_accuracy,
                 "testing_accuracy": testing_accuracy}
+
+    def __save_checkpoint(self, model, optimizer, scheduler, checkpoint_path):
+        state = {'model': model.state_dict(),
+                 'optimizer': optimizer.state_dict(),
+                 'scheduler': scheduler.state_dict()}
+        torch.save(state, checkpoint_path)
+
+    def __load_checkpoint(self, model, optimizer, scheduler, checkpoint_path):
+        state = torch.load(checkpoint_path)
+        model.load_state_dict(state['model'])
+        optimizer.load_state_dict(state['optimizer'])
+        scheduler.load_state_dict(state['scheduler'])
+        return model, optimizer, scheduler
