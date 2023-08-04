@@ -1,5 +1,5 @@
 {
-  "run": "mlp_4_hidden_test_run",
+  "run": "mlp_4_hidden_test_run_lr0_01",
 
   "sharpness_analysis": {
     "enabled": false,
@@ -14,6 +14,6 @@
     "enabled": false
   },
   "inference_analysis": {
-    "enabled": true
+    "enabled": false
   }
 }
