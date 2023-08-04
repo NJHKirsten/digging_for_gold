@@ -64,4 +64,4 @@ class TrainingAnalysis(Analysis):
             ax.set_ylim(0, 100)
         else:
             ax.set_ylim(0)
-        plt.gca().xaxis.set_major_locator(mticker.MultipleLocator(1))
+        plt.gca().xaxis.set_major_locator(mticker.MaxNLocator(integer=True))

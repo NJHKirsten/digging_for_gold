@@ -16,7 +16,7 @@
   "save_interval" : 10,
 
   "multiprocessing" : true,
-  "num_processes" : 2,
+  "num_processes" : 10,
   "use_cuda" : true,
   "cuda_device" : "cuda:0",
   "cuda_config" : {
@@ -29,5 +29,5 @@
   "model_class": "Mlp4Hidden",
   "dataset_name": "mnist",
   "dataset_class": "MnistSetup",
-  "sample_size": 2
+  "sample_size": 10
 }

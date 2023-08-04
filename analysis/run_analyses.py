@@ -19,9 +19,12 @@ class RunAnalyses:
     @staticmethod
     def run(analysis_config_name, seeds_file="seeds.json"):
         analysis_config = json.load(open(f'analysis_configs/{analysis_config_name}.json', 'r'))
-        run_config = json.load(open(f'run_configs/{analysis_config["run"]}.json', 'r'))
-        analysis = RunAnalyses(analysis_config, run_config, seeds_file)
-        analysis.run_all()
+        for run in analysis_config['runs']:
+            print(f"Running analysis for run {run}")
+            run_config = json.load(open(f'run_configs/{run}.json', 'r'))
+            analysis_config['run'] = run
+            analysis = RunAnalyses(analysis_config, run_config, seeds_file)
+            analysis.run_all()
 
     def run_all(self):
         if self.analysis_config['training_analysis']['enabled']:
