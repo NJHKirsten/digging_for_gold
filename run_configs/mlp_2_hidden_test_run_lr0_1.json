@@ -1,16 +1,16 @@
 {
   "dry_run" : false,
 
-  "learning_rate" : 1,
+  "learning_rate" : 0.1,
   "gamma" : 0.9,
-  "optimizer": "adadelta",
+  "optimizer": "adam",
 
   "epochs" : 100,
 
   "batch_size" : 100000,
   "test_batch_size" : 100000,
 
-  "prune_sizes" : [ 0.7, 0.5],
+  "prune_sizes" : [ ],
 
   "log_interval" : 10,
   "save_interval" : 10,

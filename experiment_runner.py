@@ -134,7 +134,7 @@ class ExperimentRunner:
             model.to(device)
             parameters_to_prune = model.get_pruning_parameters()
 
-            # TODO DELETE
+            ############################
             zero_weights, total_weights = WeightAnalysis.get_zero_weights(model)
             print(f"Before Pruning - {zero_weights}/{total_weights} - {zero_weights / total_weights}")
             ############################
@@ -154,7 +154,7 @@ class ExperimentRunner:
 
             print(f"Pruned {portion * 100}% of weights")
 
-            # TODO DELETE
+            ############################
             zero_weights, total_weights = WeightAnalysis.get_zero_weights(model)
             print(f"After pruning - {zero_weights}/{total_weights} - {zero_weights / total_weights}")
             ############################
@@ -166,7 +166,7 @@ class ExperimentRunner:
                               seed,
                               f'{round(portion * 100)}%')
 
-            # TODO DELETE
+            ############################
             zero_weights, total_weights = WeightAnalysis.get_zero_weights(model)
             print(f"Saving model - {zero_weights}/{total_weights} - {zero_weights / total_weights}")
             ############################
@@ -215,8 +215,8 @@ class ExperimentRunner:
         train_loader = torch.utils.data.DataLoader(training_set, **train_kwargs)
         test_loader = torch.utils.data.DataLoader(testing_set, **test_kwargs)
 
-
-        model_training_config = model.get_training_config(self.run_config["learning_rate"], self.run_config["gamma"], self.run_config["optimizer"])
+        model_training_config = model.get_training_config(self.run_config["learning_rate"], self.run_config["gamma"],
+                                                          self.run_config["optimizer"])
         optimizer = model_training_config["optimizer"]
         scheduler = model_training_config["scheduler"]
         loss_function = model_training_config["loss_function"]
@@ -226,21 +226,22 @@ class ExperimentRunner:
 
         training_graph = []
         start_epoch = 1
-        # TODO Get epoch data if exists
+        # Get epoch data if exists
         if os.path.isfile(csv_graph_path):
             print("Continue with existing training graph")
             training_graph_df = pd.read_csv(csv_graph_path)
             start_epoch = training_graph_df["epoch"].max() + 1
             training_graph = training_graph_df.to_dict('records')
 
-        # TODO Load model if exists
+        # Load model if exists
         if os.path.isfile(model_path):
             print("Continue with existing model")
+            # TODO Load optimizer and other states as well, and set to training after loading
             model.load_state_dict(torch.load(model_path))
 
         model = model.to(device)
 
-        for epoch in range(start_epoch, self.run_config["epochs"] + 1):  # TODO Continue at last saved epoch
+        for epoch in range(start_epoch, self.run_config["epochs"] + 1):  # Continue at last saved epoch
             self.__train_model(model, device, train_loader, optimizer, epoch, loss_function,
                                self.run_config["log_interval"],
                                self.run_config["dry_run"])
@@ -251,7 +252,7 @@ class ExperimentRunner:
             if epoch % self.run_config["log_interval"] == 0:
                 print(f"Finished epoch {epoch}")
 
-            # TODO Save epoch data and model at saving interval
+            # TODO Save optimizer and other states as well, and set to training before saving
             if epoch % self.run_config["save_interval"] == 0:
                 os.makedirs(f"runs/{self.run_config['run']}/trained_models/{model_name}_{dataset_name}/{seed}",
                             exist_ok=True)
@@ -262,7 +263,7 @@ class ExperimentRunner:
                             exist_ok=True)
                 training_graph_df.to_csv(csv_graph_path, index=False)
 
-        # TODO DELETE
+        ############################
         zero_weights, total_weights = WeightAnalysis.get_zero_weights(model)
         print(f"After training - {zero_weights}/{total_weights} - {zero_weights / total_weights}")
         ############################
@@ -320,6 +321,7 @@ class ExperimentRunner:
 
     @staticmethod
     def __get_epoch_data(epoch, model, device, train_loader, test_loader, loss_function):
+        # TODO Use model eval (Check if this should be done)
         training_loss = 0
         train_correct = 0
         testing_loss = 0

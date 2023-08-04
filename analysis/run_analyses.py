@@ -3,6 +3,7 @@ import os
 
 import pandas as pd
 
+from analysis.inference_analysis import InferenceAnalysis
 from analysis.sharpness_analysis import SharpnessAnalysis
 from analysis.training_analysis import TrainingAnalysis
 from analysis.weight_analysis import WeightAnalysis
@@ -32,3 +33,7 @@ class RunAnalyses:
         if self.analysis_config['sharpness_analysis']['enabled']:
             sharpness_analysis = SharpnessAnalysis(self.analysis_config, self.run_config, self.seeds_file)
             sharpness_analysis.run()
+        if self.analysis_config['inference_analysis']['enabled']:
+            inference_analysis = InferenceAnalysis(self.analysis_config, self.run_config, self.seeds_file)
+            inference_analysis.run()
+

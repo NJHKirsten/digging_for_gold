@@ -1,16 +1,19 @@
 {
-  "run": "mlp_2_hidden_test_run_adam",
+  "run": "mlp_4_hidden_test_run",
 
   "sharpness_analysis": {
-    "enabled": true,
+    "enabled": false,
     "distance": 0.01,
     "steps": 10,
     "samples": 1
   },
   "training_analysis": {
-    "enabled": true
+    "enabled": false
   },
   "weight_analysis": {
+    "enabled": false
+  },
+  "inference_analysis": {
     "enabled": true
   }
 }
