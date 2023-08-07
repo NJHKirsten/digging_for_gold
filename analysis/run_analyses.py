@@ -6,6 +6,7 @@ import pandas as pd
 from analysis.inference_analysis import InferenceAnalysis
 from analysis.sharpness_analysis import SharpnessAnalysis
 from analysis.sharpness_analysis_metrics import SharpnessAnalysisMetrics
+from analysis.sharpness_analysis_metrics_plot import SharpnessAnalysisMetricsPlot
 from analysis.sharpness_analysis_plot import SharpnessAnalysisPlot
 from analysis.training_analysis import TrainingAnalysis
 from analysis.weight_analysis import WeightAnalysis
@@ -44,6 +45,9 @@ class RunAnalyses:
         if self.analysis_config['sharpness_analysis_metrics']['enabled']:
             sharpness_analysis_metrics = SharpnessAnalysisMetrics(self.analysis_config, self.run_config, self.seeds_file)
             sharpness_analysis_metrics.run()
+        if self.analysis_config['sharpness_analysis_metrics_plot']['enabled']:
+            sharpness_analysis_metrics_plot = SharpnessAnalysisMetricsPlot(self.analysis_config, self.run_config, self.seeds_file)
+            sharpness_analysis_metrics_plot.run()
         if self.analysis_config['inference_analysis']['enabled']:
             inference_analysis = InferenceAnalysis(self.analysis_config, self.run_config, self.seeds_file)
             inference_analysis.run()

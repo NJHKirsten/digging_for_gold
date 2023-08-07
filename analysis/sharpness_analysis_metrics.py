@@ -45,8 +45,8 @@ class SharpnessAnalysisMetrics(Analysis):
         csv_graph_path = f"sharpness_results/{self.analysis_config['run']}/{sharpness_config['name']}/{seed}.csv"
         sharpness_graph = pd.read_csv(csv_graph_path)
 
-        sharpness_graph['train_loss'] = sharpness_graph['train_loss'] / 60000
-        sharpness_graph['test_loss'] = sharpness_graph['test_loss'] / 10000
+        sharpness_graph['train_loss'] = sharpness_graph['train_loss']
+        sharpness_graph['test_loss'] = sharpness_graph['test_loss']
 
         l_sub = sharpness_graph[sharpness_graph['step'] < 0]
         l_add = sharpness_graph[sharpness_graph['step'] > 0]
