@@ -25,8 +25,8 @@
       "shuffle": true
   },
 
-  "model_name": "mlp_2_hidden",
-  "model_class": "Mlp2Hidden",
+  "model_name": "mlp_4_hidden",
+  "model_class": "Mlp4Hidden",
   "dataset_name": "mnist",
   "dataset_class": "MnistSetup",
   "sample_size": 100

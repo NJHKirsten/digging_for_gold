@@ -58,7 +58,7 @@ class TrainingAnalysis(Analysis):
     def __configure_plot(self, ax, metric):
         ax.set_xlabel('Epoch')
         ax.set_ylabel(metric[metric.find('_') + 1:].capitalize())
-        ax.suptitle(f'{self.analysis_config["run"]}')
+        plt.suptitle(f'{self.analysis_config["run"]}')
         ax.set_title(f'{metric.replace("_", " ").capitalize()} during training')
         if metric.find('accuracy') != -1:
             ax.set_ylim(0, 100)
