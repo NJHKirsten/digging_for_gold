@@ -73,22 +73,25 @@ class SharpnessAnalysis(Analysis):
             for step in range(-1 * steps, steps + 1):
                 # model_copy.load_state_dict(model.state_dict())
                 for name, parameter in model_copy.state_dict().items():
-                    mask = masks[sample][name]#.to(device)
+                    mask = masks[sample][name]  # .to(device)
                     walk = parameter + (mask * distance)
                     parameter.copy_(walk)
 
-                train_loss, test_loss = self.__calculate_loss(model_copy, train_loader, test_loader, loss_function, device)
+                train_loss, test_loss = self.__calculate_loss(model_copy,
+                                                              train_loader,
+                                                              test_loader,
+                                                              loss_function,
+                                                              device)
                 sharpness_graph.append({
                     'sample': sample,
-                    'step': step,
+                    'step': step * distance,
                     'train_loss': train_loss,
                     'test_loss': test_loss
                 })
-                print(f"{step*distance:.3g} - {train_loss}")
+                print(f"{step * distance:.3g} - {train_loss}")
 
             os.makedirs(os.path.dirname(csv_graph_path), exist_ok=True)
             pd.DataFrame(sharpness_graph).to_csv(csv_graph_path, index=False)
-
 
     def __inference_setup(self, model):
         train_kwargs = {'batch_size': self.run_config["batch_size"]}
@@ -128,6 +131,6 @@ class SharpnessAnalysis(Analysis):
             for data, target in test_loader:
                 data, target = data.to(device), target.to(device)
                 output = model(data)
-                train_loss += loss_function(output, target, reduction='sum').item()
+                test_loss += loss_function(output, target, reduction='sum').item()
 
         return train_loss, test_loss

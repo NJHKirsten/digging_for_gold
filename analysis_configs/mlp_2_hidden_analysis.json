@@ -1,7 +1,5 @@
 {
   "runs": [
-    "mlp_4_hidden_test_run_lr0_01",
-    "mlp_4_hidden_test_run_lr0_001",
     "mlp_2_hidden_test_run_lr0_01",
     "mlp_2_hidden_test_run_lr0_001"
   ],
