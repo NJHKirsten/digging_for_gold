@@ -1,16 +1,60 @@
 {
   "runs": [
-    "mlp_4_hidden_test_run_checkpoints"
+    "mlp_4_hidden_test_run_lr0_01",
+    "mlp_4_hidden_test_run_lr0_001",
+    "mlp_2_hidden_test_run_lr0_01",
+    "mlp_2_hidden_test_run_lr0_001"
   ],
 
   "sharpness_analysis": {
+    "enabled": true,
+    "configs": [
+      {
+        "name": "0_1",
+        "distance": 0.1,
+        "steps": 10,
+        "samples": 5
+      },
+      {
+        "name": "0_01",
+        "distance": 0.01,
+        "steps": 10,
+        "samples": 5
+      },
+      {
+        "name": "0_001",
+        "distance": 0.001,
+        "steps": 10,
+        "samples": 5
+      }
+    ]
+  },
+  "sharpness_analysis_plot": {
     "enabled": false,
-    "distance": 0.01,
-    "steps": 10,
-    "samples": 1
+    "individual_plots": true,
+    "configs": [
+      {
+        "name": "0_1",
+        "distance": 0.1,
+        "steps": 10,
+        "samples": 5
+      },
+      {
+        "name": "0_01",
+        "distance": 0.01,
+        "steps": 10,
+        "samples": 5
+      },
+      {
+        "name": "0_001",
+        "distance": 0.001,
+        "steps": 10,
+        "samples": 5
+      }
+    ]
   },
   "training_analysis": {
-    "enabled": true
+    "enabled": false
   },
   "weight_analysis": {
     "enabled": false
