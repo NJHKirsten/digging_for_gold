@@ -4,7 +4,7 @@
     "mlp_4_hidden_test_run_lr0_001"
   ],
   "multiprocessing": true,
-  "num_processes": 10,
+  "num_processes": 2,
 
   "sharpness_analysis": {
     "enabled": true,

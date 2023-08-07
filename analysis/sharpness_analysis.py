@@ -59,7 +59,7 @@ class SharpnessAnalysis(Analysis):
 
         train_loader, test_loader, loss_function, device = self.__inference_setup(model)
 
-        model.to(device)
+        model = model.to(device)
         train_loss, test_loss = self.__calculate_loss(model,
                                                       train_loader,
                                                       test_loader,
