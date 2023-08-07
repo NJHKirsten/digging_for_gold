@@ -14,4 +14,6 @@ module load chpc/python/anaconda/3-2021.11
 
 source /mnt/lustre/users/hkirsten/DiggingForGold/digging_for_gold/job_env/bin/activate
 
+OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1
+
 python3 mlp_4_hidden.py
