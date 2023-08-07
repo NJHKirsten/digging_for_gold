@@ -1,5 +1,10 @@
-import math
 import os
+os.environ["OMP_NUM_THREADS"] = "10"
+os.environ["OPENBLAS_NUM_THREADS"] = "10"
+os.environ["MKL_NUM_THREADS"] = "10"
+os.environ["VECLIB_MAXIMUM_THREADS"] = "10"
+os.environ["NUMEXPR_NUM_THREADS"] = "10"
+import math
 import sys
 
 import pandas as pd
@@ -12,7 +17,7 @@ from analysis.weight_analysis import WeightAnalysis
 from model_imports import *
 from dataset_imports import *
 
-from multiprocessing import Process, Pool
+from multiprocessing import Process
 
 
 class ExperimentRunner:

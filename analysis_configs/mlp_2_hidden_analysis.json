@@ -6,7 +6,7 @@
   "num_processes": 10,
 
   "sharpness_analysis": {
-    "enabled": true,
+    "enabled": false,
     "configs": [
       {
         "name": "0_01",
@@ -23,7 +23,7 @@
     ]
   },
   "sharpness_analysis_plot": {
-    "enabled": false,
+    "enabled": true,
     "individual_plots": true,
     "configs": [
       {
@@ -41,7 +41,7 @@
     ]
   },
   "sharpness_analysis_metrics": {
-    "enabled": false,
+    "enabled": true,
     "configs": [
       {
         "name": "0_01",
@@ -58,7 +58,7 @@
     ]
   },
   "sharpness_analysis_metrics_plot": {
-    "enabled": false,
+    "enabled": true,
     "configs": [
       {
         "name": "0_01",

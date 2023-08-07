@@ -30,9 +30,9 @@ class SharpnessAnalysisMetricsPlot(Analysis):
         sharpness_graph = pd.read_csv(csv_graph_path)
 
         self.__plot_average_sharpness(sharpness_graph, sharpness_config['name'])
-        # self.__plot_max_sharpness(sharpness_graph, sharpness_config['name'])
-        # self.__plot_average_symmetry(sharpness_graph, sharpness_config['name'])
-        # self.__plot_max_symmetry(sharpness_graph, sharpness_config['name'])
+        self.__plot_max_sharpness(sharpness_graph, sharpness_config['name'])
+        self.__plot_average_symmetry(sharpness_graph, sharpness_config['name'])
+        self.__plot_max_symmetry(sharpness_graph, sharpness_config['name'])
 
     def __plot_average_sharpness(self, sharpness_graph, config_name):
         ax = sns.displot(x='average_sharpness',
