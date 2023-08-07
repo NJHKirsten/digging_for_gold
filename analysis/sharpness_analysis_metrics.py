@@ -33,10 +33,12 @@ class SharpnessAnalysisMetrics(Analysis):
         csv_graph_path = f"sharpness_measures/{self.analysis_config['run']}/{sharpness_config['name']}.csv"
         sharpness_graph = []
 
-        for seed in seeds:
+        for sample in range(self.run_config['sample_size']):
+            seed = seeds[sample]
             sharpness_graph.append(
                 self.__calculate_individual_sharpness_sample(sharpness_config, seed))
 
+        os.makedirs(os.path.dirname(csv_graph_path), exist_ok=True)
         pd.DataFrame(sharpness_graph).to_csv(csv_graph_path, index=False)
 
     def __calculate_individual_sharpness_sample(self, sharpness_config, seed):
@@ -54,6 +56,7 @@ class SharpnessAnalysisMetrics(Analysis):
         max_symmetry = self.__max_symmetry(l_sub, l_add, l_opt)
         average_symmetry = self.__average_symmetry(l_sub, l_add, l_opt)
 
+        print(f"Seed: {seed}")
         print(f"Average Sharpness: {average_sharpness}")
         print(f"Average Sharpness Alt: {average_sharpness_alt}")
         print(f"Max Sharpness: {max_sharpness}")
@@ -84,8 +87,8 @@ class SharpnessAnalysisMetrics(Analysis):
             l_sub_step = l_sub.loc[l_sub['step'] == -1*k]
             l_add_step = l_add.loc[l_add['step'] == k]
             for sample in l_sub['sample'].unique():
-                l_sub_avg += (l_sub_step.loc[l_sub_step['sample' == sample]]['train_loss'] - l_opt_loss).first()
-                l_add_avg += (l_add_step.loc[l_add_step['sample' == sample]]['train_loss'] - l_opt_loss).first()
+                l_sub_avg += (l_sub_step.loc[l_sub_step['sample'] == sample]['train_loss'] - l_opt_loss).max()
+                l_add_avg += (l_add_step.loc[l_add_step['sample'] == sample]['train_loss'] - l_opt_loss).max()
 
             v += (l_sub_avg + l_add_avg) / (2 * len(l_sub['sample'].unique()))
         return v / len(l_add['step'].unique())

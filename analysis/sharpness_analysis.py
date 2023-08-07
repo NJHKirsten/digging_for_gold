@@ -61,19 +61,24 @@ class SharpnessAnalysis(Analysis):
         train_loader, test_loader, loss_function, device = self.__inference_setup(model)
 
         model = model.to(device)
-        train_loss, test_loss = self.__calculate_loss(model,
-                                                      train_loader,
-                                                      test_loader,
-                                                      loss_function,
-                                                      device)
-
-        print(f"Original Loss: {train_loss}")
+        # train_loss, test_loss = self.__calculate_loss(model,
+        #                                               train_loader,
+        #                                               test_loader,
+        #                                               loss_function,
+        #                                               device)
+        #
+        # print(f"Original Loss: {train_loss}")
 
         masks = []
         for sample in range(samples):
             masks.append({})
             for name, parameter in model.state_dict().items():
-                mask = torch.rand_like(parameter) < 0.5  # TODO Is it ok if the split is not exactly 50%
+                random_negatives = (torch.rand_like(parameter) < 0.5)
+                boolean_mask = torch.rand_like(parameter) < 0.5  # TODO Is it ok if the split is not exactly 50%
+                mask = torch.zeros_like(parameter)
+                mask[boolean_mask] = 1
+                mask[random_negatives] = mask[random_negatives] * -1
+
                 # mask.to(device)
                 masks[sample][name] = mask.to(device)
 

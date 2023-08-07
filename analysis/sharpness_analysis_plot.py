@@ -36,7 +36,8 @@ class SharpnessAnalysisPlot(Analysis):
 
     def __plot_individual_sharpness(self, seeds, sharpness_config):
 
-        for seed in seeds:
+        for sample in range(self.run_config['sample_size']):
+            seed = seeds[sample]
             self.__plot_individual_sharpness_sample(sharpness_config, seed)
 
     def __plot_individual_sharpness_sample(self, sharpness_config, seed):
