@@ -2,6 +2,7 @@ import copy
 import json
 import os
 import sys
+from multiprocessing import Process
 
 import pandas as pd
 import torch
@@ -21,6 +22,7 @@ class SharpnessAnalysis(Analysis):
         print(f'Sharpness')
         for sharpness_config in self.analysis_config['sharpness_analysis']['configs']:
             print(f"Sharpness Config: {sharpness_config['name']}")
+            process_list = []
             for sample in range(self.run_config['sample_size']):
                 seed = seeds[sample]
                 model.load_state_dict(
@@ -28,13 +30,27 @@ class SharpnessAnalysis(Analysis):
                         f"runs/{self.analysis_config['run']}/trained_models/{self.run_config['model_name']}_{self.run_config['dataset_name']}/{seed}/original.pt"),
                     strict=False)
                 print(f"Seed {seed}")
-                self.__calculate_sharpness(model, seed, sharpness_config)
+                if self.analysis_config["multiprocessing"]:
+                    process = Process(target=self.calculate_sharpness,
+                                      args=(model, seed, sharpness_config))
+                    process.start()
+                    process_list.append(process)
+                    if self.analysis_config["num_processes"] <= len(process_list):
+                        for process in process_list:
+                            process.join()
+                        process_list = []
+                else:
+                    self.calculate_sharpness(model, seed, sharpness_config)
+
+            if self.analysis_config["multiprocessing"]:
+                for process in process_list:
+                    process.join()
 
     @staticmethod
     def __class_from_string(class_name):
         return getattr(sys.modules[__name__], class_name)
 
-    def __calculate_sharpness(self, model, seed, sharpness_config):
+    def calculate_sharpness(self, model, seed, sharpness_config):
         distance = sharpness_config['distance']
         steps = sharpness_config['steps']
         samples = sharpness_config['samples']

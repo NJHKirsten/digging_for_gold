@@ -3,6 +3,8 @@
     "mlp_2_hidden_test_run_lr0_01",
     "mlp_2_hidden_test_run_lr0_001"
   ],
+  "multiprocessing": true,
+  "num_processes": 10,
 
   "sharpness_analysis": {
     "enabled": true,
