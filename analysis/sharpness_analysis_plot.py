@@ -25,7 +25,6 @@ class SharpnessAnalysisPlot(Analysis):
                 self.__plot_individual_sharpness(seeds, sharpness_config)
             else:
                 self.__plot_sharpness(seeds, sharpness_config)
-            break # TODO Remove
 
     @staticmethod
     def __class_from_string(class_name):
@@ -39,7 +38,6 @@ class SharpnessAnalysisPlot(Analysis):
 
         for seed in seeds:
             self.__plot_individual_sharpness_sample(sharpness_config, seed)
-            break # TODO Remove
 
     def __plot_individual_sharpness_sample(self, sharpness_config, seed):
 

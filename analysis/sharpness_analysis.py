@@ -41,13 +41,21 @@ class SharpnessAnalysis(Analysis):
 
         torch.manual_seed(seed)
 
-        model_copy = copy.deepcopy(model)
         train_loader, test_loader, loss_function, device = self.__inference_setup(model)
+
+        model.to(device)
+        train_loss, test_loss = self.__calculate_loss(model,
+                                                      train_loader,
+                                                      test_loader,
+                                                      loss_function,
+                                                      device)
+
+        print(f"Original Loss: {train_loss}")
 
         masks = []
         for sample in range(samples):
             masks.append({})
-            for name, parameter in model_copy.state_dict().items():
+            for name, parameter in model.state_dict().items():
                 mask = torch.rand_like(parameter) < 0.5  # TODO Is it ok if the split is not exactly 50%
                 # mask.to(device)
                 masks[sample][name] = mask.to(device)
@@ -57,24 +65,30 @@ class SharpnessAnalysis(Analysis):
         if os.path.isfile(csv_graph_path):
             sharpness_graph = pd.read_csv(csv_graph_path).to_dict('records')
 
-        model_copy.to(device)
+
+
+        model_copy = copy.deepcopy(model)
 
         for sample in range(samples):
 
             if any([sample == graph['sample'] for graph in sharpness_graph]):
                 continue
 
-            for name, parameter in model_copy.state_dict().items():
-                mask = masks[sample][name]  # .to(device)
-                walk = parameter - (mask * distance * steps)
-                parameter.copy_(walk)
+            # model_copy.load_state_dict(model.state_dict())
+            # model_copy.to(device)
+
+            # for name, parameter in model_copy.state_dict().items():
+            #     mask = masks[sample][name]  # .to(device)
+            #     walk = parameter - (mask * round(distance * steps, 3))
+            #     parameter.copy_(walk)
 
             print(f'[{sample}]')
             for step in range(-1 * steps, steps + 1):
-                # model_copy.load_state_dict(model.state_dict())
+                model_copy.load_state_dict(model.state_dict().copy())
+                model_copy.to(device)
                 for name, parameter in model_copy.state_dict().items():
                     mask = masks[sample][name]  # .to(device)
-                    walk = parameter + (mask * distance)
+                    walk = parameter + (mask * round(distance * step, 3))
                     parameter.copy_(walk)
 
                 train_loss, test_loss = self.__calculate_loss(model_copy,
@@ -84,7 +98,7 @@ class SharpnessAnalysis(Analysis):
                                                               device)
                 sharpness_graph.append({
                     'sample': sample,
-                    'step': step * distance,
+                    'step': round(step * distance, 3),
                     'train_loss': train_loss,
                     'test_loss': test_loss
                 })
@@ -125,12 +139,12 @@ class SharpnessAnalysis(Analysis):
         with torch.no_grad():
             for data, target in train_loader:
                 data, target = data.to(device), target.to(device)
-                output = model(data)
+                output = model(data).to(device)
                 train_loss += loss_function(output, target, reduction='sum').item()
 
             for data, target in test_loader:
                 data, target = data.to(device), target.to(device)
-                output = model(data)
+                output = model(data).to(device)
                 test_loss += loss_function(output, target, reduction='sum').item()
 
         return train_loss, test_loss

@@ -32,12 +32,14 @@ class InferenceAnalysis(Analysis):
 
     def __calculate_inference_accuracy(self, model, seed):
 
-        train_loader, test_loader, device = self.__inference_setup(model)
+        train_loader, test_loader, device, loss_function = self.__inference_setup(model)
 
-        training_accuracy, testing_accuracy = self.__calculate_accuracy(model, train_loader, test_loader, device)
+        training_accuracy, testing_accuracy, training_loss, testing_loss = self.__calculate_accuracy(model, train_loader, test_loader, device, loss_function)
 
         print(f"Training accuracy: {training_accuracy*100:.2f}%")
         print(f"Testing accuracy: {testing_accuracy*100:.2f}%")
+        print(f"Training loss: {training_loss:.2f}")
+        print(f"Testing loss: {testing_loss:.2f}")
 
     def __inference_setup(self, model):
         train_kwargs = {'batch_size': self.run_config["batch_size"]}
@@ -60,27 +62,31 @@ class InferenceAnalysis(Analysis):
                                                           self.run_config["optimizer"])
         loss_function = model_training_config["loss_function"]
 
-        return train_loader, test_loader, device
+        return train_loader, test_loader, device, loss_function
 
-    def __calculate_accuracy(self, model, train_loader, test_loader, device):
+    def __calculate_accuracy(self, model, train_loader, test_loader, device, loss_function):
         # train_loader, loss_function, device = self.__inference_setup(model)
         model.to(device)
         train_correct = 0
         test_correct = 0
+        training_loss = 0
+        testing_loss = 0
         model.eval()
         with torch.no_grad():
             for data, target in train_loader:
                 data, target = data.to(device), target.to(device)
                 output = model(data).to(device)
+                training_loss += loss_function(output, target, reduction='sum').item()
                 pred = output.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
                 train_correct += pred.eq(target.view_as(pred)).sum().item()
 
             for data, target in test_loader:
                 data, target = data.to(device), target.to(device)
                 output = model(data).to(device)
+                testing_loss += loss_function(output, target, reduction='sum').item()
                 pred = output.argmax(dim=1, keepdim=True)
                 test_correct += pred.eq(target.view_as(pred)).sum().item()
 
         train_accuracy = train_correct * 1. / len(train_loader.dataset)
         test_accuracy = test_correct * 1. / len(test_loader.dataset)
-        return train_accuracy, test_accuracy
+        return train_accuracy, test_accuracy, training_loss, testing_loss
