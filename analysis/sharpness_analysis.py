@@ -25,10 +25,6 @@ class SharpnessAnalysis(Analysis):
             process_list = []
             for sample in range(self.run_config['sample_size']):
                 seed = seeds[sample]
-                model.load_state_dict(
-                    torch.load(
-                        f"runs/{self.analysis_config['run']}/trained_models/{self.run_config['model_name']}_{self.run_config['dataset_name']}/{seed}/original.pt"),
-                    strict=False)
                 print(f"Seed {seed}")
                 if self.analysis_config["multiprocessing"]:
                     process = Process(target=self.calculate_sharpness,
@@ -56,6 +52,11 @@ class SharpnessAnalysis(Analysis):
         samples = sharpness_config['samples']
 
         torch.manual_seed(seed)
+
+        model.load_state_dict(
+            torch.load(
+                f"runs/{self.analysis_config['run']}/trained_models/{self.run_config['model_name']}_{self.run_config['dataset_name']}/{seed}/original.pt"),
+            strict=False)
 
         train_loader, test_loader, loss_function, device = self.__inference_setup(model)
 
