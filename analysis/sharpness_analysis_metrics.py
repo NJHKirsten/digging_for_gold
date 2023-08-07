@@ -22,7 +22,6 @@ class SharpnessAnalysisMetrics(Analysis):
         for sharpness_config in self.analysis_config['sharpness_analysis_metrics']['configs']:
             print(f"Sharpness Config: {sharpness_config['name']}")
             self.__calculate_sharpness(seeds, sharpness_config)
-            break  # TODO Remove
 
     @staticmethod
     def __class_from_string(class_name):
@@ -46,19 +45,22 @@ class SharpnessAnalysisMetrics(Analysis):
         csv_graph_path = f"sharpness_results/{self.analysis_config['run']}/{sharpness_config['name']}/{seed}.csv"
         sharpness_graph = pd.read_csv(csv_graph_path)
 
+        sharpness_graph['train_loss'] = sharpness_graph['train_loss'] / 60000
+        sharpness_graph['test_loss'] = sharpness_graph['test_loss'] / 10000
+
         l_sub = sharpness_graph[sharpness_graph['step'] < 0]
-        l_add = sharpness_graph[sharpness_graph['step'] < 0]
+        l_add = sharpness_graph[sharpness_graph['step'] > 0]
         l_opt = sharpness_graph[sharpness_graph['step'] == 0]
 
         average_sharpness = self.__average_sharpness(l_sub, l_add, l_opt)
-        average_sharpness_alt = self.__average_sharpness_alt(l_sub, l_add, l_opt)
+        # average_sharpness_alt = self.__average_sharpness_alt(l_sub, l_add, l_opt)
         max_sharpness = self.__max_sharpness(l_sub, l_add, l_opt)
         max_symmetry = self.__max_symmetry(l_sub, l_add, l_opt)
         average_symmetry = self.__average_symmetry(l_sub, l_add, l_opt)
 
         print(f"Seed: {seed}")
         print(f"Average Sharpness: {average_sharpness}")
-        print(f"Average Sharpness Alt: {average_sharpness_alt}")
+        # print(f"Average Sharpness Alt: {average_sharpness_alt}")
         print(f"Max Sharpness: {max_sharpness}")
         print(f"Max Symmetry: {max_symmetry}")
         print(f"Average Symmetry: {average_symmetry}")
@@ -80,12 +82,13 @@ class SharpnessAnalysisMetrics(Analysis):
     def __average_sharpness_alt(self, l_sub, l_add, l_opt):
         l_opt_loss = l_opt['train_loss'].max()
 
-        l_sub_avg = 0
-        l_add_avg = 0
+
         v = 0
         for k in l_add['step'].unique():
             l_sub_step = l_sub.loc[l_sub['step'] == -1*k]
             l_add_step = l_add.loc[l_add['step'] == k]
+            l_sub_avg = 0
+            l_add_avg = 0
             for sample in l_sub['sample'].unique():
                 l_sub_avg += (l_sub_step.loc[l_sub_step['sample'] == sample]['train_loss'] - l_opt_loss).max()
                 l_add_avg += (l_add_step.loc[l_add_step['sample'] == sample]['train_loss'] - l_opt_loss).max()

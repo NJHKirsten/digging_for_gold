@@ -19,7 +19,7 @@ class SharpnessAnalysisPlot(Analysis):
         seeds = json.load(open(f"{path}/{self.seeds_file}"))
 
         print(f'Sharpness Plot')
-        for sharpness_config in self.analysis_config['sharpness_analysis']['configs']:
+        for sharpness_config in self.analysis_config['sharpness_analysis_plot']['configs']:
             print(f"Sharpness Config: {sharpness_config['name']}")
             if self.analysis_config['sharpness_analysis_plot']['individual_plots']:
                 self.__plot_individual_sharpness(seeds, sharpness_config)
@@ -51,7 +51,7 @@ class SharpnessAnalysisPlot(Analysis):
                           palette=sns.color_palette(),
                           data=sharpness_graph)
 
-        ax.set_title(f"Sharpness {sharpness_config['name']} - {seed}")
+        ax.set_title(f"Sharpness {sharpness_config['name']} - {seed} (Run: {self.analysis_config['run']})")
         ax.set_xlabel("Step")
         ax.set_ylabel("Train Loss")
 

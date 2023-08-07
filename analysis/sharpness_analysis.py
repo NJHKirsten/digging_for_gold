@@ -169,4 +169,6 @@ class SharpnessAnalysis(Analysis):
                 output = model(data).to(device)
                 test_loss += loss_function(output, target, reduction='sum').item()
 
+        train_loss /= len(train_loader.dataset)
+        test_loss /= len(test_loader.dataset)
         return train_loss, test_loss
