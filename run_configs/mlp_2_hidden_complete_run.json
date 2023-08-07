@@ -7,7 +7,7 @@
 
   "epochs" : 100,
 
-  "batch_size" : 100000,
+  "batch_size" : 4096,
   "test_batch_size" : 100000,
 
   "prune_sizes" : [ ],
