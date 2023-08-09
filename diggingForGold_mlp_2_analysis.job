@@ -1,0 +1,19 @@
+#!/bin/bash
+#PBS -N diggingForGoldHannes
+#PBS -q gpu_1
+#PBS -l select=1:ncpus=10:mpiprocs=10:ngpus=1
+#PBS -P CSCI1166
+#PBS -l walltime=12:00:00
+#PBS -M u19049014@tuks.co.za
+
+cd /mnt/lustre/users/hkirsten/DiggingForGold/digging_for_gold || exit
+
+echo $PBS_JOBID
+
+module load chpc/python/anaconda/3-2021.11
+
+source /mnt/lustre/users/hkirsten/DiggingForGold/digging_for_gold/job_env/bin/activate
+
+OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1
+
+python3 mlp_2_hidden_analysis.py

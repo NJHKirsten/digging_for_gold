@@ -1,12 +1,12 @@
 {
   "runs": [
-    "mlp_2_hidden_complete_run"
+    "mlp_4_hidden_complete_run"
   ],
   "multiprocessing": true,
   "num_processes": 10,
 
   "sharpness_analysis": {
-    "enabled": true,
+    "enabled": false,
     "configs": [
       {
         "name": "0_01",
@@ -23,8 +23,8 @@
     ]
   },
   "sharpness_analysis_plot": {
-    "enabled": false,
-    "individual_plots": true,
+    "enabled": true,
+    "individual_plots": false,
     "configs": [
       {
         "name": "0_01",
@@ -41,7 +41,7 @@
     ]
   },
   "sharpness_analysis_metrics": {
-    "enabled": false,
+    "enabled": true,
     "configs": [
       {
         "name": "0_01",
@@ -58,7 +58,7 @@
     ]
   },
   "sharpness_analysis_metrics_plot": {
-    "enabled": false,
+    "enabled": true,
     "configs": [
       {
         "name": "0_01",
