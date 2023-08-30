@@ -1,14 +1,14 @@
 {
   "dry_run" : false,
 
-  "learning_rate" : 0.001,
+  "learning_rate" : 0.01,
   "gamma" : 0.9,
   "optimizer": "adam",
 
   "epochs" : 100,
 
-  "batch_size" : 128,
-  "test_batch_size" : 128,
+  "batch_size" : 4096,
+  "test_batch_size" : 4096,
 
   "prune_sizes" : [ ],
 
@@ -18,16 +18,16 @@
   "multiprocessing" : true,
   "num_processes" : 10,
   "use_cuda" : true,
-  "cuda_device" : "cuda:3",
+  "cuda_device" : "cuda:2",
   "cuda_config" : {
       "num_workers": 1,
       "pin_memory": true,
       "shuffle": true
   },
 
-  "model_name": "mlp_10_hidden",
-  "model_class": "Mlp10Hidden",
-  "dataset_name": "cifar10",
-  "dataset_class": "Cifar10Setup",
+  "model_name": "mlp_4_hidden",
+  "model_class": "Mlp4HiddenFashionMnist",
+  "dataset_name": "fashionmnist",
+  "dataset_class": "FashionMnistSetup",
   "sample_size": 100
 }
