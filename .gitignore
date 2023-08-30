@@ -3,3 +3,8 @@
 /.idea/
 /sharpness_results/
 /sharpness_measures/
+/weight_analysis/
+/parameter_analysis/
+/hypothesis_tests/
+/plots/
+/example_results/

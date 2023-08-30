@@ -8,7 +8,7 @@ import torch
 import torch.nn.utils.prune as prune
 from torch.nn import init
 
-from analysis.weight_analysis import WeightAnalysis
+from analysis.pruning_analysis import PruningAnalysis
 from model_imports import *
 from dataset_imports import *
 
@@ -50,7 +50,7 @@ class ExperimentRunner:
         print(f"Running experiment for {model_name} on {dataset_name}")
 
         self.__run_training_experiment(model_name, model_class, dataset_name, dataset_class, sample_size)
-        self.__run_pruning_experiment(model_name, model_class, dataset_name, dataset_class, sample_size)
+        # self.__run_pruning_experiment(model_name, model_class, dataset_name, dataset_class, sample_size)
 
     def __run_training_experiment(self, model_name, model_class, dataset_name, dataset_class, sample_size):
         dataset_setup = self.__class_from_string(dataset_class)()
@@ -135,7 +135,7 @@ class ExperimentRunner:
             parameters_to_prune = model.get_pruning_parameters()
 
             ############################
-            zero_weights, total_weights = WeightAnalysis.get_zero_weights(model)
+            zero_weights, total_weights = PruningAnalysis.get_zero_weights(model)
             print(f"Before Pruning - {zero_weights}/{total_weights} - {zero_weights / total_weights}")
             ############################
 
@@ -155,7 +155,7 @@ class ExperimentRunner:
             print(f"Pruned {portion * 100}% of weights")
 
             ############################
-            zero_weights, total_weights = WeightAnalysis.get_zero_weights(model)
+            zero_weights, total_weights = PruningAnalysis.get_zero_weights(model)
             print(f"After pruning - {zero_weights}/{total_weights} - {zero_weights / total_weights}")
             ############################
 
@@ -167,7 +167,7 @@ class ExperimentRunner:
                               f'{round(portion * 100)}%')
 
             ############################
-            zero_weights, total_weights = WeightAnalysis.get_zero_weights(model)
+            zero_weights, total_weights = PruningAnalysis.get_zero_weights(model)
             print(f"Saving model - {zero_weights}/{total_weights} - {zero_weights / total_weights}")
             ############################
 
@@ -269,8 +269,8 @@ class ExperimentRunner:
                 training_graph_df.to_csv(csv_graph_path, index=False)
 
         ############################
-        zero_weights, total_weights = WeightAnalysis.get_zero_weights(model)
-        print(f"After training - {zero_weights}/{total_weights} - {zero_weights / total_weights}")
+        # zero_weights, total_weights = PruningAnalysis.get_zero_weights(model)
+        # print(f"After training - {zero_weights}/{total_weights} - {zero_weights / total_weights}")
         ############################
 
         os.makedirs(f"runs/{self.run_config['run']}/training_graphs/{model_name}_{dataset_name}/{seed}",
@@ -298,9 +298,9 @@ class ExperimentRunner:
             loss.backward()
             optimizer.step()
             if batch_idx % log_interval == 0:
-                # print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                #     epoch, batch_idx * len(data), len(train_loader.dataset),
-                #     100. * batch_idx / len(train_loader), loss.item()))
+                print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+                    epoch, batch_idx * len(data), len(train_loader.dataset),
+                    100. * batch_idx / len(train_loader), loss.item()))
                 # total_loss += loss.item()
                 if dry_run:
                     break

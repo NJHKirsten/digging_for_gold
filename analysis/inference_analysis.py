@@ -1,9 +1,8 @@
-import copy
 import json
 import sys
 
 import torch
-
+from torch.nn.utils import weight_norm
 from analysis.analysis import Analysis
 from model_imports import *
 from dataset_imports import *
@@ -18,6 +17,7 @@ class InferenceAnalysis(Analysis):
 
         print(f'Inference accuracy')
         for sample in range(self.run_config['sample_size']):
+            model = self.__class_from_string(self.run_config['model_class'])()
             seed = seeds[sample]
             model.load_state_dict(
                 torch.load(
@@ -34,10 +34,47 @@ class InferenceAnalysis(Analysis):
 
         train_loader, test_loader, device, loss_function = self.__inference_setup(model)
 
-        training_accuracy, testing_accuracy, training_loss, testing_loss = self.__calculate_accuracy(model, train_loader, test_loader, device, loss_function)
+        flip = False
+        # for name, param in model.named_parameters():
+        #     if param.requires_grad and 'weight' in name:
+        #         param.requires_grad = False
+        #         if flip:
+        #             new_param = param.div_(10)
+        #             flip = False
+        #         else:
+        #             new_param = param.mul_(10)
+        #             flip = True
+        #         param.data = new_param
+        #         param.requires_grad = True
+        for name, module in model.named_modules():
+            if hasattr(module, 'weight') and not name == 'fc5':
+                weight = module.weight
+                # bias = module.bias
+                weight.requires_grad = False
+                # bias.requires_grad = False
+                if flip:
+                    new_weight = weight.div_(10)
+                    # new_bias = bias.div_(10)
+                    flip = False
+                else:
+                    new_weight = weight.mul_(10)
+                    # new_bias = bias.mul_(10)
+                    flip = True
+                weight.data = new_weight
+                # bias.data = new_bias
+                weight.requires_grad = True
+                # bias.requires_grad = True
 
-        print(f"Training accuracy: {training_accuracy*100:.2f}%")
-        print(f"Testing accuracy: {testing_accuracy*100:.2f}%")
+        # model = weight_norm(model, name='weight')
+
+        training_accuracy, testing_accuracy, training_loss, testing_loss = self.__calculate_accuracy(model,
+                                                                                                     train_loader,
+                                                                                                     test_loader,
+                                                                                                     device,
+                                                                                                     loss_function)
+
+        print(f"Training accuracy: {training_accuracy * 100:.8f}%")
+        print(f"Testing accuracy: {testing_accuracy * 100:.8f}%")
         print(f"Training loss: {training_loss:.2f}")
         print(f"Testing loss: {testing_loss:.2f}")
 

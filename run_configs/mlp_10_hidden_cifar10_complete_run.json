@@ -7,8 +7,8 @@
 
   "epochs" : 100,
 
-  "batch_size" : 100000,
-  "test_batch_size" : 100000,
+  "batch_size" : 128,
+  "test_batch_size" : 128,
 
   "prune_sizes" : [ ],
 
@@ -20,14 +20,14 @@
   "use_cuda" : true,
   "cuda_device" : "cuda:0",
   "cuda_config" : {
-      "num_workers": 4,
+      "num_workers": 1,
       "pin_memory": true,
       "shuffle": true
   },
 
-  "model_name": "mlp_4_hidden",
-  "model_class": "Mlp4Hidden",
-  "dataset_name": "mnist",
-  "dataset_class": "MnistSetup",
-  "sample_size": 10
+  "model_name": "mlp_10_hidden",
+  "model_class": "Mlp10Hidden",
+  "dataset_name": "cifar10",
+  "dataset_class": "Cifar10Setup",
+  "sample_size": 100
 }

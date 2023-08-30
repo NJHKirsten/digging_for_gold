@@ -1,14 +1,14 @@
 {
   "dry_run" : false,
 
-  "learning_rate" : 0.01,
+  "learning_rate" : 0.001,
   "gamma" : 0.9,
   "optimizer": "adam",
 
   "epochs" : 100,
 
-  "batch_size" : 100000,
-  "test_batch_size" : 100000,
+  "batch_size" : 128,
+  "test_batch_size" : 128,
 
   "prune_sizes" : [ ],
 
@@ -20,14 +20,14 @@
   "use_cuda" : true,
   "cuda_device" : "cuda:0",
   "cuda_config" : {
-      "num_workers": 4,
+      "num_workers": 1,
       "pin_memory": true,
       "shuffle": true
   },
 
-  "model_name": "mlp_4_hidden",
-  "model_class": "Mlp4Hidden",
+  "model_name": "small_cnn",
+  "model_class": "SmallCNNMnist",
   "dataset_name": "mnist",
   "dataset_class": "MnistSetup",
-  "sample_size": 10
+  "sample_size": 100
 }

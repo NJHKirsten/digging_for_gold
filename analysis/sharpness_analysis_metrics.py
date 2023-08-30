@@ -1,15 +1,10 @@
-import copy
 import json
 import os
 import sys
 
 import pandas as pd
-import seaborn as sns
-from matplotlib import pyplot as plt
 
 from analysis.analysis import Analysis
-from model_imports import *
-from dataset_imports import *
 
 
 class SharpnessAnalysisMetrics(Analysis):

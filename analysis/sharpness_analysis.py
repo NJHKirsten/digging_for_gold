@@ -2,10 +2,12 @@ import copy
 import json
 import os
 import sys
-from multiprocessing import Process
+from multiprocessing import Process, Queue
 
+import numpy as np
 import pandas as pd
 import torch
+from pyhessian import hessian
 
 from analysis.analysis import Analysis
 from model_imports import *
@@ -20,27 +22,31 @@ class SharpnessAnalysis(Analysis):
         model = self.__class_from_string(self.run_config['model_class'])()
 
         print(f'Sharpness')
-        for sharpness_config in self.analysis_config['sharpness_analysis']['configs']:
-            print(f"Sharpness Config: {sharpness_config['name']}")
-            process_list = []
-            for sample in range(self.run_config['sample_size']):
-                seed = seeds[sample]
-                print(f"Seed {seed}")
-                if self.analysis_config["multiprocessing"]:
-                    process = Process(target=self.calculate_sharpness,
-                                      args=(model, seed, sharpness_config))
-                    process.start()
-                    process_list.append(process)
-                    if self.analysis_config["num_processes"] <= len(process_list):
-                        for process in process_list:
-                            process.join()
-                        process_list = []
-                else:
-                    self.calculate_sharpness(model, seed, sharpness_config)
+        if self.analysis_config['sharpness_analysis']['hessian']:
+            self.__calculate_hessian_sharpness(model, seeds, self.run_config['sample_size'])
 
-            if self.analysis_config["multiprocessing"]:
-                for process in process_list:
-                    process.join()
+        if self.analysis_config['sharpness_analysis']['sampling']:
+            for sharpness_config in self.analysis_config['sharpness_analysis']['configs']:
+                print(f"Sharpness Config: {sharpness_config['name']}")
+                process_list = []
+                for sample in range(self.run_config['sample_size']):
+                    seed = seeds[sample]
+                    print(f"Seed {seed}")
+                    if self.analysis_config["multiprocessing"]:
+                        process = Process(target=self.calculate_sharpness,
+                                          args=(model, seed, sharpness_config))
+                        process.start()
+                        process_list.append(process)
+                        if self.analysis_config["num_processes"] <= len(process_list):
+                            for process in process_list:
+                                process.join()
+                            process_list = []
+                    else:
+                        self.calculate_sharpness(model, seed, sharpness_config)
+
+                if self.analysis_config["multiprocessing"]:
+                    for process in process_list:
+                        process.join()
 
     @staticmethod
     def __class_from_string(class_name):
@@ -86,8 +92,6 @@ class SharpnessAnalysis(Analysis):
         sharpness_graph = []
         if os.path.isfile(csv_graph_path):
             sharpness_graph = pd.read_csv(csv_graph_path).to_dict('records')
-
-
 
         model_copy = copy.deepcopy(model)
 
@@ -140,6 +144,8 @@ class SharpnessAnalysis(Analysis):
             # raise Exception("No CUDA device available")
             device = torch.device("cpu")
 
+        model.to(device)
+
         dataset_setup = self.__class_from_string(self.run_config["dataset_class"])()
         training_set, testing_set = dataset_setup.create_datasets()
 
@@ -172,3 +178,68 @@ class SharpnessAnalysis(Analysis):
         train_loss /= len(train_loader.dataset)
         test_loss /= len(test_loader.dataset)
         return train_loss, test_loss
+
+    def __calculate_hessian_sharpness(self, model, seeds, sample_size):
+        csv_graph_path = f"sharpness_results/{self.analysis_config['run']}/hessian.csv"
+        sharpness_graph = []
+        if os.path.isfile(csv_graph_path):
+            sharpness_graph = pd.read_csv(csv_graph_path).to_dict('records')
+
+        concurrent_output_queue = Queue()
+        process_list = []
+        for sample in range(sample_size):
+            seed = seeds[sample]
+            if any([seed == graph['seed'] for graph in sharpness_graph]):
+                continue
+
+            process = Process(target=self.calculate_sample_hessian,
+                              args=(model, seed, concurrent_output_queue))
+            process.start()
+            process_list.append(process)
+            if self.analysis_config["num_processes"] <= len(process_list):
+                for process in process_list:
+                    process.join()
+                process_list = []
+                while not concurrent_output_queue.empty():
+                    sharpness_graph.append(concurrent_output_queue.get_nowait())
+            # self.calculate_sample_hessian(model, seed, concurrent_output_queue)
+            if sharpness_graph:
+                os.makedirs(os.path.dirname(csv_graph_path), exist_ok=True)
+                pd.DataFrame(sharpness_graph).to_csv(csv_graph_path, index=False)
+
+        if self.analysis_config["multiprocessing"]:
+            for process in process_list:
+                process.join()
+            while not concurrent_output_queue.empty():
+                sharpness_graph.append(concurrent_output_queue.get_nowait())
+        if sharpness_graph:
+            os.makedirs(os.path.dirname(csv_graph_path), exist_ok=True)
+            pd.DataFrame(sharpness_graph).to_csv(csv_graph_path, index=False)
+
+    def calculate_sample_hessian(self, model, seed, sharpness_graph):
+
+        model = copy.deepcopy(model)
+        model.load_state_dict(
+            torch.load(
+                f"runs/{self.analysis_config['run']}/trained_models/{self.run_config['model_name']}_{self.run_config['dataset_name']}/{seed}/original.pt"),
+            strict=False)
+        model.eval()
+        train_loader, test_loader, loss_function, device = self.__inference_setup(model)
+        model = model.to(device)
+
+        torch.manual_seed(seed)
+
+        print("start")
+        hessian_comp = hessian(model, loss_function, dataloader=train_loader, cuda=True)
+        print("hessian")
+        hessian_trace = np.mean(hessian_comp.trace(tol=1e-3))
+        print("trace")
+        hessian_eigenvalues, _ = hessian_comp.eigenvalues(top_n=1, tol=1e-3)
+        hessian_top_eigenvalue = hessian_eigenvalues[0]
+        print(f"[{seed}] - {hessian_trace} - {hessian_top_eigenvalue}")
+        sharpness_graph.put({
+            'seed': seed,
+            'hessian_trace': hessian_trace,
+            'hessian_top_eigenvalue': hessian_top_eigenvalue
+        })
+

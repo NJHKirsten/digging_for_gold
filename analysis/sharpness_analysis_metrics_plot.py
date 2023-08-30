@@ -1,6 +1,3 @@
-import copy
-import json
-import os
 import sys
 
 import pandas as pd
@@ -8,8 +5,6 @@ import seaborn as sns
 from matplotlib import pyplot as plt
 
 from analysis.analysis import Analysis
-from model_imports import *
-from dataset_imports import *
 
 
 class SharpnessAnalysisMetricsPlot(Analysis):
@@ -20,10 +15,6 @@ class SharpnessAnalysisMetricsPlot(Analysis):
         for sharpness_config in self.analysis_config['sharpness_analysis_metrics_plot']['configs']:
             print(f"Sharpness Config: {sharpness_config['name']}")
             self.__plot_metrics(sharpness_config)
-
-    @staticmethod
-    def __class_from_string(class_name):
-        return getattr(sys.modules[__name__], class_name)
 
     def __plot_metrics(self, sharpness_config):
         csv_graph_path = f"sharpness_measures/{self.analysis_config['run']}/{sharpness_config['name']}.csv"

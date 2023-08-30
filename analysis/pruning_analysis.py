@@ -2,15 +2,15 @@ import json
 import sys
 
 import torch
-from torch import nn
 
 from analysis.analysis import Analysis
 from model_imports import *
 
 
-class WeightAnalysis(Analysis):
+class PruningAnalysis(Analysis):
 
     def run(self):
+        print("Pruning Analysis")
         path = f"experiments/{self.run_config['model_name']}_{self.run_config['dataset_name']}/"
         seeds = json.load(open(f"{path}/{self.seeds_file}"))
         model = self.__class_from_string(self.run_config['model_class'])()
