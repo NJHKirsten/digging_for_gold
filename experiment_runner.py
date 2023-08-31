@@ -199,7 +199,6 @@ class ExperimentRunner:
 
         print(f"Cuda count: {torch.cuda.device_count()}")
         print(f"Cuda available: {torch.cuda.is_available()}")
-        print(f"Cuda device: {torch.cuda.current_device()}")
         print(f"Cuda use_cuda: {self.run_config['use_cuda']}")
         if self.run_config["use_cuda"] and torch.cuda.is_available():
             device = torch.device(self.run_config["cuda_device"])
@@ -209,6 +208,7 @@ class ExperimentRunner:
         else:
             raise Exception("No CUDA device available")
             # device = torch.device("cpu")
+        print(f"Cuda device: {torch.cuda.current_device()}")
 
         training_set, testing_set = dataset_setup.create_datasets()
 

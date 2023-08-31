@@ -7,16 +7,12 @@
 
   "sharpness_analysis": {
     "enabled": true,
+    "sampling": true,
+    "hessian": true,
     "configs": [
       {
         "name": "0_01",
         "distance": 0.01,
-        "steps": 10,
-        "samples": 30
-      },
-      {
-        "name": "0_001",
-        "distance": 0.001,
         "steps": 10,
         "samples": 30
       }
@@ -25,16 +21,11 @@
   "sharpness_analysis_plot": {
     "enabled": false,
     "individual_plots": true,
+    "plot_max_and_min": true,
     "configs": [
       {
         "name": "0_01",
         "distance": 0.01,
-        "steps": 10,
-        "samples": 30
-      },
-      {
-        "name": "0_001",
-        "distance": 0.001,
         "steps": 10,
         "samples": 30
       }
@@ -48,12 +39,6 @@
         "distance": 0.01,
         "steps": 10,
         "samples": 30
-      },
-      {
-        "name": "0_001",
-        "distance": 0.001,
-        "steps": 10,
-        "samples": 30
       }
     ]
   },
@@ -65,20 +50,23 @@
         "distance": 0.01,
         "steps": 10,
         "samples": 30
-      },
-      {
-        "name": "0_001",
-        "distance": 0.001,
-        "steps": 10,
-        "samples": 30
       }
     ]
   },
   "training_analysis": {
     "enabled": false
   },
-  "weight_analysis": {
+  "parameter_analysis": {
     "enabled": false
+  },
+  "parameter_analysis_plot": {
+    "enabled": false
+  },
+  "correlation_plot": {
+    "enabled": false
+  },
+  "hypothesis_testing": {
+      "enabled": false
   },
   "inference_analysis": {
     "enabled": false

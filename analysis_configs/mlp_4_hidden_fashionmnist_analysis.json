@@ -1,6 +1,6 @@
 {
   "runs": [
-    "mlp_4_hidden_complete_run"
+    "mlp_4_hidden_fashionmnist_complete_run"
   ],
   "multiprocessing": true,
   "num_processes": 10,
