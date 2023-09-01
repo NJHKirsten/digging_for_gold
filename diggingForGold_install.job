@@ -1,6 +1,6 @@
 #!/bin/bash
 #PBS -N diggingForGoldHannes
-#PBS -q smp
+#PBS -q serial
 #PBS -l select=1:ncpus=10
 #PBS -P CSCI1166
 #PBS -l walltime=1:00:00
