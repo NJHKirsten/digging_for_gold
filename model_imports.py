@@ -7,3 +7,5 @@ from experiments.small_cnn_mnist.model import SmallCNNMnist
 from experiments.mlp_4_hidden_fashionmnist.model import Mlp4HiddenFashionMnist
 from experiments.mlp_6_hidden_fashionmnist.model import Mlp6HiddenFashionMnist
 from experiments.mlp_1_hidden_breastcancer.model import Mlp1HiddenBreastCancer
+from experiments.mlp_4_hidden_breastcancer.model import Mlp4HiddenBreastCancer
+from experiments.mlp_6_hidden_breastcancer.model import Mlp6HiddenBreastCancer

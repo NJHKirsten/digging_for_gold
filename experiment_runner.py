@@ -315,7 +315,10 @@ class ExperimentRunner:
                 data, target = data.to(device), target.to(device)
                 output = model(data).to(device)
                 test_loss += loss_function(output, target, reduction='sum').item()  # sum up batch loss
-                pred = output.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
+                if output.shape[1] == 1:
+                    pred = output.round()
+                else:
+                    pred = output.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
                 correct += pred.eq(target.view_as(pred)).sum().item()
 
         test_loss /= len(test_loader.dataset)
@@ -336,14 +339,20 @@ class ExperimentRunner:
                 data, target = data.to(device), target.to(device)
                 output = model(data).to(device)
                 training_loss += loss_function(output, target, reduction='sum').item()  # sum up batch loss
-                pred = output.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
+                if output.shape[1] == 1:
+                    pred = output.round()
+                else:
+                    pred = output.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
                 train_correct += pred.eq(target.view_as(pred)).sum().item()
 
             for data, target in test_loader:
                 data, target = data.to(device), target.to(device)
                 output = model(data).to(device)
                 testing_loss += loss_function(output, target, reduction='sum').item()  # sum up batch loss
-                pred = output.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
+                if output.shape[1] == 1:
+                    pred = output.round()
+                else:
+                    pred = output.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
                 test_correct += pred.eq(target.view_as(pred)).sum().item()
 
         training_accuracy = 100. * train_correct / len(train_loader.dataset)

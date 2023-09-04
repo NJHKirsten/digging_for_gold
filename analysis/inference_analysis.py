@@ -114,14 +114,20 @@ class InferenceAnalysis(Analysis):
                 data, target = data.to(device), target.to(device)
                 output = model(data).to(device)
                 training_loss += loss_function(output, target, reduction='sum').item()
-                pred = output.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
+                if output.shape[1] == 1:
+                    pred = output.round()
+                else:
+                    pred = output.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
                 train_correct += pred.eq(target.view_as(pred)).sum().item()
 
             for data, target in test_loader:
                 data, target = data.to(device), target.to(device)
                 output = model(data).to(device)
                 testing_loss += loss_function(output, target, reduction='sum').item()
-                pred = output.argmax(dim=1, keepdim=True)
+                if output.shape[1] == 1:
+                    pred = output.round()
+                else:
+                    pred = output.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
                 test_correct += pred.eq(target.view_as(pred)).sum().item()
 
         train_accuracy = train_correct * 1. / len(train_loader.dataset)

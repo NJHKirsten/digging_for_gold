@@ -25,9 +25,9 @@
       "shuffle": true
   },
 
-  "model_name": "mlp_1_hidden",
-  "model_class": "Mlp1HiddenBreastCancer",
-  "dataset_name": "breastcancer",
-  "dataset_class": "BreastCancerSetup",
+  "model_name": "mlp_2_hidden",
+  "model_class": "Mlp2Hidden",
+  "dataset_name": "mnist",
+  "dataset_class": "MnistSetup",
   "sample_size": 1
 }
