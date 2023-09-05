@@ -1,8 +1,8 @@
-from experiment_runner import ExperimentRunner
+from analysis.run_analyses import RunAnalyses
 
 
 def main():
-    ExperimentRunner.run(run_name="alex_cnn_cifar10_analysis")
+    RunAnalyses.run("alex_cnn_cifar10_analysis")
 
 
 if __name__ == "__main__":

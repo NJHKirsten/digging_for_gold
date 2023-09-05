@@ -1,8 +1,8 @@
-from experiment_runner import ExperimentRunner
+from analysis.run_analyses import RunAnalyses
 
 
 def main():
-    ExperimentRunner.run(run_name="mlp_4_hidden_fashionmnist_analysis")
+    RunAnalyses.run("mlp_4_hidden_fashionmnist_analysis")
 
 
 if __name__ == "__main__":
