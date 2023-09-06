@@ -1,7 +1,7 @@
 #!/bin/bash
 #PBS -N diggingForGoldHannes
 #PBS -q gpu_3
-#PBS -l select=1:ncpus=40:ngpus=4
+#PBS -l select=1:ncpus=30:ngpus=3
 #PBS -P CSCI1166
 #PBS -l walltime=12:00:00
 #PBS -M u19049014@tuks.co.za
