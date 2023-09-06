@@ -370,7 +370,7 @@ class ExperimentRunner:
         torch.save(state, checkpoint_path)
 
     def __load_checkpoint(self, model, optimizer, scheduler, checkpoint_path):
-        state = torch.load(checkpoint_path)
+        state = torch.load(checkpoint_path, map_location=self.run_config["cuda_device"])
         model.load_state_dict(state['model'])
         optimizer.load_state_dict(state['optimizer'])
         scheduler.load_state_dict(state['scheduler'])
