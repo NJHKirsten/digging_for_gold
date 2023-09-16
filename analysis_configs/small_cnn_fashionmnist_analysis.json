@@ -1,13 +1,13 @@
 {
   "runs": [
-    "mlp_4_hidden_complete_run"
+    "small_cnn_fashionmnist_complete_run"
   ],
   "multiprocessing": true,
   "num_processes": 5,
 
   "sharpness_analysis": {
     "enabled": true,
-    "sampling": false,
+    "sampling": true,
     "hessian": true,
     "configs": [
       {

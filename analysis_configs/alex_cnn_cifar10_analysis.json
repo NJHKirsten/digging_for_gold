@@ -3,7 +3,7 @@
     "alex_cnn_cifar10_complete_run"
   ],
   "multiprocessing": true,
-  "num_processes": 10,
+  "num_processes": 3,
 
   "sharpness_analysis": {
     "enabled": true,

@@ -3,7 +3,7 @@
     "mlp_6_hidden_fashionmnist_complete_run"
   ],
   "multiprocessing": true,
-  "num_processes": 10,
+  "num_processes": 5,
 
   "sharpness_analysis": {
     "enabled": true,

@@ -1,0 +1,33 @@
+{
+  "dry_run" : false,
+
+  "learning_rate" : 0.001,
+  "gamma" : 0.9,
+  "optimizer": "adam",
+
+  "epochs" : 100,
+
+  "batch_size" : 128,
+  "test_batch_size" : 128,
+
+  "prune_sizes" : [ ],
+
+  "log_interval" : 10,
+  "save_interval" : 10,
+
+  "multiprocessing" : true,
+  "num_processes" : 1,
+  "use_cuda" : true,
+  "cuda_device" : "cuda:0",
+  "cuda_config" : {
+      "num_workers": 1,
+      "pin_memory": true,
+      "shuffle": true
+  },
+
+  "model_name": "small_cnn",
+  "model_class": "SmallCNNFashionMnist",
+  "dataset_name": "fashionmnist",
+  "dataset_class": "FashionMnistSetup",
+  "sample_size": 2
+}
