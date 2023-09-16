@@ -61,7 +61,8 @@ class SharpnessAnalysis(Analysis):
 
         model.load_state_dict(
             torch.load(
-                f"runs/{self.analysis_config['run']}/trained_models/{self.run_config['model_name']}_{self.run_config['dataset_name']}/{seed}/original.pt"),
+                f"runs/{self.analysis_config['run']}/trained_models/{self.run_config['model_name']}_{self.run_config['dataset_name']}/{seed}/original.pt",
+                map_location=self.run_config["cuda_device"]),
             strict=False)
 
         train_loader, test_loader, loss_function, device = self.__inference_setup(model)
@@ -221,7 +222,8 @@ class SharpnessAnalysis(Analysis):
         model = copy.deepcopy(model)
         model.load_state_dict(
             torch.load(
-                f"runs/{self.analysis_config['run']}/trained_models/{self.run_config['model_name']}_{self.run_config['dataset_name']}/{seed}/original.pt"),
+                f"runs/{self.analysis_config['run']}/trained_models/{self.run_config['model_name']}_{self.run_config['dataset_name']}/{seed}/original.pt",
+                map_location=self.run_config["cuda_device"]),
             strict=False)
         model.eval()
         train_loader, test_loader, loss_function, device = self.__inference_setup(model)

@@ -7,7 +7,7 @@
 
   "sharpness_analysis": {
     "enabled": true,
-    "sampling": true,
+    "sampling": false,
     "hessian": true,
     "configs": [
       {

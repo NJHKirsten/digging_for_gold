@@ -21,7 +21,8 @@ class InferenceAnalysis(Analysis):
             seed = seeds[sample]
             model.load_state_dict(
                 torch.load(
-                    f"runs/{self.analysis_config['run']}/trained_models/{self.run_config['model_name']}_{self.run_config['dataset_name']}/{seed}/original.pt"),
+                    f"runs/{self.analysis_config['run']}/trained_models/{self.run_config['model_name']}_{self.run_config['dataset_name']}/{seed}/original.pt",
+                    map_location=self.run_config["cuda_device"]),
                 strict=False)
             print(f"Seed {seed}")
             self.__calculate_inference_accuracy(model, seed)

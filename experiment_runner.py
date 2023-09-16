@@ -122,7 +122,8 @@ class ExperimentRunner:
     def prune_sample(self, model, model_name, dataset_setup, dataset_name, seed):
 
         model.load_state_dict(torch.load(
-            f"runs/{self.run_config['run']}/trained_models/{model_name}_{dataset_name}/{seed}/original.pt"))
+            f"runs/{self.run_config['run']}/trained_models/{model_name}_{dataset_name}/{seed}/original.pt",
+            map_location=self.run_config["cuda_device"]))
         torch.manual_seed(seed)
         if self.run_config["use_cuda"] and torch.cuda.is_available():
             device = torch.device(self.run_config["cuda_device"])
@@ -173,7 +174,8 @@ class ExperimentRunner:
 
             model.load_state_dict(
                 torch.load(
-                    f"runs/{self.run_config['run']}/trained_models/{model_name}_{dataset_name}/{seed}/{round(portion * 100)}%.pt"))
+                    f"runs/{self.run_config['run']}/trained_models/{model_name}_{dataset_name}/{seed}/{round(portion * 100)}%.pt",
+                    map_location=self.run_config["cuda_device"]))
             torch.manual_seed(seed)
 
     @staticmethod
