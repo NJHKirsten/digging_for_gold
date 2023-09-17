@@ -220,6 +220,7 @@ class SharpnessAnalysis(Analysis):
     def calculate_sample_hessian(self, model, seed, sharpness_graph):
 
         model = copy.deepcopy(model)
+        torch.device(self.run_config["cuda_device"])
         model.load_state_dict(
             torch.load(
                 f"runs/{self.analysis_config['run']}/trained_models/{self.run_config['model_name']}_{self.run_config['dataset_name']}/{seed}/original.pt",
