@@ -162,8 +162,6 @@ class SharpnessAnalysis(Analysis):
                                                           self.run_config["optimizer"])
         loss_function = model_training_config["loss_function"]
 
-        torch.multiprocessing.set_start_method('spawn')
-
         return train_loader, test_loader, loss_function, device
 
     def __calculate_loss(self, model, train_loader, test_loader, loss_function, device):
@@ -193,6 +191,7 @@ class SharpnessAnalysis(Analysis):
         if os.path.isfile(csv_graph_path):
             sharpness_graph = pd.read_csv(csv_graph_path).to_dict('records')
 
+        torch.multiprocessing.set_start_method('spawn')
         concurrent_output_queue = Queue()
         process_list = []
         for sample in range(sample_size):
