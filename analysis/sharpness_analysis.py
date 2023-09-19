@@ -12,6 +12,7 @@ from pyhessian import hessian
 from analysis.analysis import Analysis
 from model_imports import *
 from dataset_imports import *
+from torch.utils.data.dataloader import default_collate
 
 
 class SharpnessAnalysis(Analysis):
@@ -142,16 +143,20 @@ class SharpnessAnalysis(Analysis):
             cuda_kwargs = self.run_config["cuda_config"]
             train_kwargs.update(cuda_kwargs)
         else:
-            # raise Exception("No CUDA device available")
-            device = torch.device("cpu")
+            raise Exception("No CUDA device available")
+            # device = torch.device("cpu")
 
         model.to(device)
 
         dataset_setup = self.__class_from_string(self.run_config["dataset_class"])()
         training_set, testing_set = dataset_setup.create_datasets()
 
-        train_loader = torch.utils.data.DataLoader(training_set, **train_kwargs)
-        test_loader = torch.utils.data.DataLoader(testing_set, **train_kwargs)
+        train_loader = torch.utils.data.DataLoader(training_set, **train_kwargs,
+                                                   collate_fn=lambda x: tuple(
+                                                       x_.to(device) for x_ in default_collate(x)))
+        test_loader = torch.utils.data.DataLoader(testing_set, **train_kwargs,
+                                                  collate_fn=lambda x: tuple(
+                                                      x_.to(device) for x_ in default_collate(x)))
 
         model_training_config = model.get_training_config(self.run_config["learning_rate"], self.run_config["gamma"],
                                                           self.run_config["optimizer"])
@@ -220,7 +225,6 @@ class SharpnessAnalysis(Analysis):
     def calculate_sample_hessian(self, model, seed, sharpness_graph):
 
         model = copy.deepcopy(model)
-        torch.device(self.run_config["cuda_device"])
         model.load_state_dict(
             torch.load(
                 f"runs/{self.analysis_config['run']}/trained_models/{self.run_config['model_name']}_{self.run_config['dataset_name']}/{seed}/original.pt",
@@ -245,4 +249,3 @@ class SharpnessAnalysis(Analysis):
             'hessian_trace': hessian_trace,
             'hessian_top_eigenvalue': hessian_top_eigenvalue
         })
-
