@@ -16,7 +16,7 @@
   "save_interval" : 10,
 
   "multiprocessing" : true,
-  "num_processes" : 1,
+  "num_processes" : 2,
   "use_cuda" : true,
   "cuda_device" : "cuda:0",
   "cuda_config" : {
