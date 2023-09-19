@@ -141,7 +141,7 @@ class SharpnessAnalysis(Analysis):
         if self.run_config["use_cuda"] and torch.cuda.is_available():
             device = torch.device(self.run_config["cuda_device"])
             cuda_kwargs = self.run_config["cuda_config"]
-            train_kwargs.update(cuda_kwargs)
+            # train_kwargs.update(cuda_kwargs)
         else:
             raise Exception("No CUDA device available")
             # device = torch.device("cpu")
@@ -191,7 +191,6 @@ class SharpnessAnalysis(Analysis):
         if os.path.isfile(csv_graph_path):
             sharpness_graph = pd.read_csv(csv_graph_path).to_dict('records')
 
-        torch.multiprocessing.set_start_method('spawn')
         concurrent_output_queue = Queue()
         process_list = []
         for sample in range(sample_size):
