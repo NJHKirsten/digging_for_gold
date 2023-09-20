@@ -236,17 +236,16 @@ class SharpnessAnalysis(Analysis):
 
         torch.manual_seed(seed)
 
-        with torch.no_grad():
-            print("start")
-            hessian_comp = hessian(model, loss_function, dataloader=train_loader, cuda=True)
-            print("hessian")
-            hessian_trace = np.mean(hessian_comp.trace(tol=1e-3))
-            print("trace")
-            hessian_eigenvalues, _ = hessian_comp.eigenvalues(top_n=1, tol=1e-3)
-            hessian_top_eigenvalue = hessian_eigenvalues[0]
-            print(f"[{seed}] - {hessian_trace} - {hessian_top_eigenvalue}")
-            sharpness_graph.put({
-                'seed': seed,
-                'hessian_trace': hessian_trace,
-                'hessian_top_eigenvalue': hessian_top_eigenvalue
-            })
+        print("start")
+        hessian_comp = hessian(model, loss_function, dataloader=train_loader, cuda=True)
+        print("hessian")
+        hessian_trace = np.mean(hessian_comp.trace(tol=1e-3))
+        print("trace")
+        hessian_eigenvalues, _ = hessian_comp.eigenvalues(top_n=1, tol=1e-3)
+        hessian_top_eigenvalue = hessian_eigenvalues[0]
+        print(f"[{seed}] - {hessian_trace} - {hessian_top_eigenvalue}")
+        sharpness_graph.put({
+            'seed': seed,
+            'hessian_trace': hessian_trace,
+            'hessian_top_eigenvalue': hessian_top_eigenvalue
+        })
